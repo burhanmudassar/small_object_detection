@@ -277,7 +277,7 @@ class Solver(object):
         _t = Timer()
 
         for iteration in iter(range((epoch_size))):
-            images, targets, idxs = next(batch_iterator)
+            images, targets, idxs, _ = next(batch_iterator)
             if use_gpu:
                 images = Variable(images.cuda())
                 targets = [Variable(anno.cuda(), volatile=True) for anno in targets]
@@ -345,7 +345,7 @@ class Solver(object):
 
         for iteration in iter(range((epoch_size))):
         # for iteration in iter(range((10))):
-            images, targets, idxs = next(batch_iterator)
+            images, targets, idxs, _ = next(batch_iterator)
             if use_gpu:
                 images = Variable(images.cuda())
                 targets = [Variable(anno.cuda(), volatile=True) for anno in targets]
@@ -482,9 +482,10 @@ class Solver(object):
             # img = dataset.pull_image(i)
             # scale = [img.shape[1], img.shape[0], img.shape[1], img.shape[0]]
 
-            images, targets, idxs = next(batch_iterator)
-            img_dummy = [dataset.pull_image(i) for i in idxs]
-            scale = [[img.shape[1], img.shape[0], img.shape[1], img.shape[0]] for img in img_dummy]
+            images, targets, idxs, orig_shape = next(batch_iterator)
+            scale = [[o.shape[1], o.shape[0], o.shape[1], o.shape[0]] for o in orig_shape] 
+            # img_dummy = [dataset.pull_image(i) for i in idxs]
+            # scale = [[img.shape[1], img.shape[0], img.shape[1], img.shape[0]] for img in img_dummy]
 
             # if use_gpu:
             #     images = Variable(dataset.preproc(img)[0].unsqueeze(0).cuda(), volatile=True)
@@ -516,15 +517,22 @@ class Solver(object):
             for i, (img_id, boxes_img, scores_img) in enumerate(zip(idxs, boxes, scores)) :
                 for j in range(1, num_classes):
                     cls_dets = list()
-                    for box,score in zip(boxes_img, scores_img):
-                        if score[j] > 0:
+                    cls_mask = np.where(scores[:,i] > 0)[0]
+                    if len(cls_mask > 0):
+                        box = boxes[cls_mask, :]
+                        box *= np.array(scale)
+                        score = scores[cls_mask, j]
+                        cls_dets = np.concatenate((box, score), axis=1)
+						
+                    #for box,score in zip(boxes_img, scores_img):
+                    #    if score[j] > 0:
                             # d = det.cpu().numpy()
                             # score, box = d[0], d[1:]
                             # box = box
                             # score = score
-                            box *= scale[i]
-                            box = np.append(box, score[j])
-                            cls_dets.append(box)
+                            #box *= scale[i]
+                            #box = np.append(box, score[j])
+                            #cls_dets.append(box)
                     if len(cls_dets) == 0:
                         cls_dets = empty_array
                     all_boxes[j][img_id] = np.array(cls_dets)

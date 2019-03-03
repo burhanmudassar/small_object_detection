@@ -42,18 +42,20 @@ def detection_collate(batch):
     targets = []
     imgs = []
     indices = []
+	shapes = []
     for _, sample in enumerate(batch):
         # for _, tup in enumerate(sample):
         imgs.append(sample[0])
         targets.append(torch.from_numpy(sample[1]).float())
         indices.append(sample[2])
+        shapes.append(sample[3])
             # if torch.is_tensor(tup):
             #     imgs.append(tup)
             # elif isinstance(tup, type(np.empty(0))):
             #     annos = torch.from_numpy(tup).float()
             #     targets.append(annos)
 
-    return (torch.stack(imgs, 0), targets, indices)
+    return (torch.stack(imgs, 0), targets, indices, shapes)
 
 from lib.utils.data_augment import preproc
 import torch.utils.data as data
