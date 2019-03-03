@@ -231,9 +231,11 @@ class Solver(object):
             if 'train' in cfg.PHASE:
                 self.train_epoch(self.model, self.train_loader, self.optimizer, self.criterion, self.writer, epoch, self.use_gpu)
             if 'eval' in cfg.PHASE:
-                self.eval_epoch(self.model, self.eval_loader, self.detector, self.criterion, self.writer, epoch, self.use_gpu)
+                with torch.no_grad():
+                    self.eval_epoch(self.model, self.eval_loader, self.detector, self.criterion, self.writer, epoch, self.use_gpu)
             if 'test' in cfg.PHASE:
-                self.test_epoch(self.model, self.test_loader, self.detector, self.output_dir, self.use_gpu)
+                with torch.no_grad():
+                    self.test_epoch(self.model, self.test_loader, self.detector, self.output_dir, self.use_gpu)
             if 'visualize' in cfg.PHASE:
                 self.visualize_epoch(self.model, self.visualize_loader, self.priorbox, self.writer, epoch,  self.use_gpu)
 
@@ -275,7 +277,7 @@ class Solver(object):
         _t = Timer()
 
         for iteration in iter(range((epoch_size))):
-            images, targets = next(batch_iterator)
+            images, targets, idxs = next(batch_iterator)
             if use_gpu:
                 images = Variable(images.cuda())
                 targets = [Variable(anno.cuda(), volatile=True) for anno in targets]
@@ -343,7 +345,7 @@ class Solver(object):
 
         for iteration in iter(range((epoch_size))):
         # for iteration in iter(range((10))):
-            images, targets = next(batch_iterator)
+            images, targets, idxs = next(batch_iterator)
             if use_gpu:
                 images = Variable(images.cuda())
                 targets = [Variable(anno.cuda(), volatile=True) for anno in targets]
@@ -464,6 +466,9 @@ class Solver(object):
     def test_epoch(self, model, data_loader, detector, output_dir, use_gpu):
         model.eval()
 
+        epoch_size = len(data_loader)
+        batch_iterator = iter(data_loader)
+
         dataset = data_loader.dataset
         num_images = len(dataset)
         num_classes = detector.num_classes
@@ -472,13 +477,26 @@ class Solver(object):
 
         _t = Timer()
 
-        for i in iter(range((num_images))):
-            img = dataset.pull_image(i)
-            scale = [img.shape[1], img.shape[0], img.shape[1], img.shape[0]]
+        # for i in iter(range((num_images))):
+        for iteration in iter(range((epoch_size))):
+            # img = dataset.pull_image(i)
+            # scale = [img.shape[1], img.shape[0], img.shape[1], img.shape[0]]
+
+            images, targets, idxs = next(batch_iterator)
+            img_dummy = [dataset.pull_image(i) for i in idxs]
+            scale = [[img.shape[1], img.shape[0], img.shape[1], img.shape[0]] for img in img_dummy]
+
+            # if use_gpu:
+            #     images = Variable(dataset.preproc(img)[0].unsqueeze(0).cuda(), volatile=True)
+            # else:
+            #     images = Variable(dataset.preproc(img)[0].unsqueeze(0), volatile=True)
+
             if use_gpu:
-                images = Variable(dataset.preproc(img)[0].unsqueeze(0).cuda(), volatile=True)
+                images = Variable(images.cuda())
+                targets = [Variable(anno.cuda(), volatile=True) for anno in targets]
             else:
-                images = Variable(dataset.preproc(img)[0].unsqueeze(0), volatile=True)
+                images = Variable(images)
+                targets = [Variable(anno, volatile=True) for anno in targets]
 
             _t.tic()
             # forward
@@ -486,26 +504,34 @@ class Solver(object):
 
             # detect
             detections = detector.forward(out)
+            boxes, scores = out
+            scores = scores.view(boxes.size(0),-1,scores.size(1))
+
+            boxes = boxes.detach().cpu().numpy()
+            scores = scores.detach().cpu().numpy()
 
             time = _t.toc()
 
             # TODO: make it smart:
-            for j in range(1, num_classes):
-                cls_dets = list()
-                for det in detections[0][j]:
-                    if det[0] > 0:
-                        d = det.cpu().numpy()
-                        score, box = d[0], d[1:]
-                        box *= scale
-                        box = np.append(box, score)
-                        cls_dets.append(box)
-                if len(cls_dets) == 0:
-                    cls_dets = empty_array
-                all_boxes[j][i] = np.array(cls_dets)
+            for i, (img_id, boxes_img, scores_img) in enumerate(zip(idxs, boxes, scores)) :
+                for j in range(1, num_classes):
+                    cls_dets = list()
+                    for box,score in zip(boxes_img, scores_img):
+                        if score[j] > 0:
+                            # d = det.cpu().numpy()
+                            # score, box = d[0], d[1:]
+                            # box = box
+                            # score = score
+                            box *= scale[i]
+                            box = np.append(box, score[j])
+                            cls_dets.append(box)
+                    if len(cls_dets) == 0:
+                        cls_dets = empty_array
+                    all_boxes[j][img_id] = np.array(cls_dets)
 
             # log per iter
             log = '\r==>Test: || {iters:d}/{epoch_size:d} in {time:.3f}s [{prograss}]\r'.format(
-                    prograss='#'*int(round(10*i/num_images)) + '-'*int(round(10*(1-i/num_images))), iters=i, epoch_size=num_images,
+                    prograss='#'*int(round(10*iteration/epoch_size)) + '-'*int(round(10*(1-iteration/epoch_size))), iters=iteration, epoch_size=epoch_size,
                     time=time)
             sys.stdout.write(log)
             sys.stdout.flush()

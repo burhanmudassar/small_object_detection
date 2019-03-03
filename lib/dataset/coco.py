@@ -37,6 +37,7 @@ class COCODetection(data.Dataset):
                  dataset_name='COCO'):
         self.root = root
         self.cache_path = os.path.join(self.root, 'cache')
+        os.makedirs(self.cache_path, exist_ok=True)
         self.image_set = image_sets
         self.preproc = preproc
         self.target_transform = target_transform
@@ -85,10 +86,10 @@ class COCODetection(data.Dataset):
         """
         # Example image path for index=119993:
         #   images/train2014/COCO_train2014_000000119993.jpg
-        # file_name = ('COCO_' + name + '_' +
-        #              str(index).zfill(12) + '.jpg')
+        file_name = ('COCO_' + name + '_' +
+                     str(index).zfill(12) + '.jpg')
         # change Example image path for index=119993 to images/train2017/000000119993.jpg
-        file_name = (str(index).zfill(12) + '.jpg')
+        # file_name = (str(index).zfill(12) + '.jpg')
         image_path = os.path.join(self.root, 'images',
                               name, file_name)
         assert os.path.exists(image_path), \
@@ -202,7 +203,7 @@ class COCODetection(data.Dataset):
                     # target = self.target_transform(target, width, height)
         #print(target.shape)
 
-        return img, target
+        return img, target, index
 
     def __len__(self):
         return len(self.ids)
