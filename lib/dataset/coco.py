@@ -281,8 +281,14 @@ class COCODetection(data.Dataset):
                 continue
             # minus 1 because of __background__
             precision = coco_eval.eval['precision'][ind_lo:(ind_hi + 1), :, cls_ind - 1, 0, 2]
+            precision_s = coco_eval.eval['precision'][ind_lo:(ind_hi + 1), :, cls_ind - 1, 1, 2]
+            precision_m = coco_eval.eval['precision'][ind_lo:(ind_hi + 1), :, cls_ind - 1, 2, 2]
+            precision_l = coco_eval.eval['precision'][ind_lo:(ind_hi + 1), :, cls_ind - 1, 3, 2]
             ap = np.mean(precision[precision > -1])
-            print('{:.1f}'.format(100 * ap))
+            ap_s = np.mean(precision_s[precision_s > -1])
+            ap_m = np.mean(precision_m[precision_m > -1])
+            ap_l = np.mean(precision_l[precision_l > -1])
+            print('{:.1f} {:.1f} {:.1f} {:.1f}'.format(100 * ap, 100*ap_s, 100*ap_m, 100*ap_l))
 
         print('~~~~ Summary metrics ~~~~')
         coco_eval.summarize()

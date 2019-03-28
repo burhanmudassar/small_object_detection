@@ -24,6 +24,8 @@ from lib.dataset.dataset_factory import load_data
 from lib.utils.config_parse import cfg
 from lib.utils.eval_utils import *
 from lib.utils.visualize_utils import *
+import matplotlib.pyplot as plt
+import glob
 
 class Solver(object):
     """
@@ -36,7 +38,8 @@ class Solver(object):
         print('===> Loading data')
         self.train_loader = load_data(cfg.DATASET, 'train') if 'train' in cfg.PHASE else None
         self.eval_loader = load_data(cfg.DATASET, 'eval') if 'eval' in cfg.PHASE else None
-        self.test_loader = load_data(cfg.DATASET, 'test') if 'test' in cfg.PHASE else None
+        # self.test_loader = load_data(cfg.DATASET, 'test') if 'test' in cfg.PHASE else None
+        self.test_loader = load_data(cfg.DATASET, 'test') if 'custom_visualize' in cfg.PHASE else None
         self.visualize_loader = load_data(cfg.DATASET, 'visualize') if 'visualize' in cfg.PHASE else None
 
         # Build model
@@ -255,6 +258,9 @@ class Solver(object):
                         self.test_epoch(self.model, self.test_loader, self.detector, self.output_dir , self.use_gpu)
                     if 'visualize' in cfg.PHASE:
                         self.visualize_epoch(self.model, self.visualize_loader, self.priorbox, self.writer, epoch,  self.use_gpu)
+                    if 'custom_visualize' in cfg.PHASE:
+                        self.custom_visualize(self.model, self.test_loader, self.detector, self.output_dir,
+                                              self.use_gpu)
         else:
             sys.stdout.write('\rCheckpoint {}:\n'.format(self.checkpoint))
             self.resume_checkpoint(self.checkpoint)
@@ -262,6 +268,8 @@ class Solver(object):
                 self.eval_epoch(self.model, self.eval_loader, self.detector, self.criterion, self.writer, 0, self.use_gpu)
             if 'test' in cfg.PHASE:
                 self.test_epoch(self.model, self.test_loader, self.detector, self.output_dir , self.use_gpu)
+            if 'custom_visualize' in cfg.PHASE:
+                self.custom_visualize(self.model, self.test_loader, self.detector, self.output_dir , self.use_gpu)
             if 'visualize' in cfg.PHASE:
                 self.visualize_epoch(self.model, self.visualize_loader, self.priorbox, self.writer, 0,  self.use_gpu)
 
@@ -479,63 +487,90 @@ class Solver(object):
 
         # for i in iter(range((num_images))):
         for iteration in iter(range((epoch_size))):
-            # img = dataset.pull_image(i)
-            # scale = [img.shape[1], img.shape[0], img.shape[1], img.shape[0]]
-
-            images, targets, idxs, orig_shape = next(batch_iterator)
-            scale = [[o.shape[1], o.shape[0], o.shape[1], o.shape[0]] for o in orig_shape] 
+#            # img = dataset.pull_image(i)
+#            # scale = [img.shape[1], img.shape[0], img.shape[1], img.shape[0]]
+            if batch_iterator is not None:
+                images, targets, idxs, orig_shape = next(batch_iterator)
+            else:
+                continue
+            scale = [[o[1], o[0], o[1], o[0]] for o in orig_shape]
             # img_dummy = [dataset.pull_image(i) for i in idxs]
-            # scale = [[img.shape[1], img.shape[0], img.shape[1], img.shape[0]] for img in img_dummy]
+#            # scale = [[img.shape[1], img.shape[0], img.shape[1], img.shape[0]] for img in img_dummy]
 
-            # if use_gpu:
-            #     images = Variable(dataset.preproc(img)[0].unsqueeze(0).cuda(), volatile=True)
-            # else:
-            #     images = Variable(dataset.preproc(img)[0].unsqueeze(0), volatile=True)
+#            # if use_gpu:
+#            #     images = Variable(dataset.preproc(img)[0].unsqueeze(0).cuda(), volatile=True)
+#            # else:
+#            #     images = Variable(dataset.preproc(img)[0].unsqueeze(0), volatile=True)
 
             if use_gpu:
                 images = Variable(images.cuda())
                 targets = [Variable(anno.cuda(), volatile=True) for anno in targets]
             else:
-                images = Variable(images)
-                targets = [Variable(anno, volatile=True) for anno in targets]
+               images = Variable(images)
+               targets = [Variable(anno, volatile=True) for anno in targets]
 
             _t.tic()
-            # forward
+#            # forward
             out = model(images, phase='eval')
 
-            # detect
+#            # detect
             detections = detector.forward(out)
-            boxes, scores = out
-            scores = scores.view(boxes.size(0),-1,scores.size(1))
+            detections = detections.detach().cpu().numpy()
+            # boxes, scores = out
+            # scores = scores.view(boxes.size(0),-1,scores.size(1))
 
-            boxes = boxes.detach().cpu().numpy()
-            scores = scores.detach().cpu().numpy()
+            # boxes = boxes.detach().cpu().numpy()
+            # scores = scores.detach().cpu().numpy()
+
 
             time = _t.toc()
 
             # TODO: make it smart:
-            for i, (img_id, boxes_img, scores_img) in enumerate(zip(idxs, boxes, scores)) :
+            for i, img_id in enumerate(idxs):
                 for j in range(1, num_classes):
                     cls_dets = list()
-                    cls_mask = np.where(scores[:,i] > 0)[0]
-                    if len(cls_mask > 0):
-                        box = boxes[cls_mask, :]
-                        box *= np.array(scale)
-                        score = scores[cls_mask, j]
+                    cls_mask = np.where(detections[i,j,:,0] > 0)[0]
+                    if len(cls_mask) > 0:
+                        box = detections[i, j, cls_mask, 1:]
+                        box *= np.array(scale[i])
+                        score = detections[i, j, cls_mask, 0:1]
+                        #
+                        # for ik in range(box.shape[0]):
+                        #     box[ik, 0] = max(0, box[ik, 0])
+                        #     box[ik, 2] = max(min(scale[i][0], box[ik, 2]),box[ik, 0])
+                        #     box[ik, 1] = max(0, box[ik, 1])
+                        #     box[ik, 3] = max(min(scale[i][1], box[ik, 3]),box[ik, 1])
+
                         cls_dets = np.concatenate((box, score), axis=1)
-						
-                    #for box,score in zip(boxes_img, scores_img):
-                    #    if score[j] > 0:
-                            # d = det.cpu().numpy()
-                            # score, box = d[0], d[1:]
-                            # box = box
-                            # score = score
-                            #box *= scale[i]
-                            #box = np.append(box, score[j])
-                            #cls_dets.append(box)
+#                    #for box,score in zip(boxes_img, scores_img):
+#                    #    if score[j] > 0:
+#                            # d = det.cpu().numpy()
+#                            # score, box = d[0], d[1:]
+#                            # box = box
+#                            # score = score
+#                            #box *= scale[i]
+#                            #box = np.append(box, score[j])
+#                            #cls_dets.append(box)
                     if len(cls_dets) == 0:
                         cls_dets = empty_array
                     all_boxes[j][img_id] = np.array(cls_dets)
+
+            # im_to_plot = dataset.pull_image(0)
+            # font = cv2.FONT_HERSHEY_SIMPLEX
+            # for label_ind, label in enumerate(dataset._classes[1:]):
+            #     for detection in all_boxes[label_ind+1][0]:
+            #         box = detection[:4].astype(np.int32)
+            #         score = detection[-1]
+            #         if (score < 0.3):
+            #             continue
+            #         else:
+            #             print(label, box, score)
+            #
+            #         cv2.rectangle(im_to_plot, (box[0], box[1]), (box[2], box[3]), (255, 0, 0), 2)
+            #         txt = '{}: {:.3f}'.format(label, score)
+            #         cv2.putText(im_to_plot, txt, (box[0], box[1]), font, 0.5, (255, 255, 255), 1)
+            # plt.imshow(im_to_plot)
+            # plt.show()
 
             # log per iter
             log = '\r==>Test: || {iters:d}/{epoch_size:d} in {time:.3f}s [{prograss}]\r'.format(
@@ -545,12 +580,87 @@ class Solver(object):
             sys.stdout.flush()
 
         # write result to pkl
-        with open(os.path.join(output_dir, 'detections.pkl'), 'wb') as f:
-            pickle.dump(all_boxes, f, pickle.HIGHEST_PROTOCOL)
+#        with open(os.path.join(output_dir, 'detections.pkl'), 'wb') as f:
+#            pickle.dump(all_boxes, f, pickle.HIGHEST_PROTOCOL)
 
         # currently the COCO dataset do not return the mean ap or ap 0.5:0.95 values
         print('Evaluating detections')
         data_loader.dataset.evaluate_detections(all_boxes, output_dir)
+
+    def custom_visualize(self, model, data_loader, detector, output_dir, use_gpu):
+        model.eval()
+
+        dataset = data_loader.dataset
+        img_path = '/home/bmudassar3/work/ssds.pytorch/data/Custom/MOT17-13'
+        custom_imgList = sorted(glob.glob(img_path + '/*.jpg'))
+
+        num_images = len(custom_imgList)
+        num_classes = detector.num_classes
+        all_boxes = [[[] for _ in range(num_images)] for _ in range(num_classes)]
+        empty_array = np.transpose(np.array([[], [], [], [], []]), (1, 0))
+
+        _t = Timer()
+
+        # for i in iter(range((num_images))):
+        for iteration in iter(range((num_images))):
+            img = cv2.imread(custom_imgList[iteration], cv2.IMREAD_COLOR)
+            scale = [[img.shape[1], img.shape[0], img.shape[1], img.shape[0]]]
+            if use_gpu:
+                images = Variable(dataset.preproc(img)[0].unsqueeze(0).cuda(), volatile=True)
+            else:
+                images = Variable(dataset.preproc(img)[0].unsqueeze(0), volatile=True)
+
+
+
+            _t.tic()
+            #            # forward
+            out = model(images, phase='eval')
+
+            #            # detect
+            detections = detector.forward(out)
+            detections = detections.detach().cpu().numpy()
+            # boxes, scores = out
+            # scores = scores.view(boxes.size(0),-1,scores.size(1))
+
+            # boxes = boxes.detach().cpu().numpy()
+            # scores = scores.detach().cpu().numpy()
+
+            time = _t.toc()
+
+            # TODO: make it smart:
+            for j in range(1, 2):
+                cls_dets = list()
+                cls_mask = np.where(detections[0, j, :, 0] > 0.3)[0]
+                if len(cls_mask) > 0:
+                    box = detections[0, j, cls_mask, 1:]
+                    box *= np.array(scale[0])
+                    score = detections[0, j, cls_mask, 0:1]
+                    cls_dets = np.concatenate((box, score), axis=1)
+
+                if len(cls_dets) == 0:
+                    cls_dets = empty_array
+                all_boxes[j][0] = np.array(cls_dets)
+
+            im_to_plot = img
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            for label_ind, label in enumerate(dataset._classes[1:2]):
+                for detection in all_boxes[label_ind+1][0]:
+                    box = detection[:4].astype(np.int32)
+                    score = detection[-1]
+                    if (score < 0.3):
+                        continue
+                    else:
+                        print(label, box, score)
+
+                    cv2.rectangle(im_to_plot, (box[0], box[1]), (box[2], box[3]), (255, 0, 0), 2)
+                    txt = '{}: {:.3f}'.format(label, score)
+                    cv2.putText(im_to_plot, txt, (box[0], box[1]), font, 0.5, (255, 255, 255), 1)
+            # plt.imshow(im_to_plot)
+            # plt.show()
+            cv2.imwrite(img_path+'/results/'+str(iteration).zfill(6)+'.jpg', im_to_plot)
+
+            # log per iter
+
 
 
     def visualize_epoch(self, model, data_loader, priorbox, writer, epoch, use_gpu):

@@ -42,7 +42,7 @@ def detection_collate(batch):
     targets = []
     imgs = []
     indices = []
-	shapes = []
+    shapes = []
     for _, sample in enumerate(batch):
         # for _, tup in enumerate(sample):
         imgs.append(sample[0])
