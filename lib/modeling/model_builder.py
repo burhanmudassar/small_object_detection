@@ -31,6 +31,8 @@ networks_map = {
                     'resnet_50': resnet.resnet_50,
                     'resnet_101': resnet.resnet_101,
                     'mobilenet_v1': mobilenet.mobilenet_v1,
+                    'mobilenet_v1_38':mobilenet.mobilenet_v1_38,
+                    'mobilenet_v1_75':mobilenet.mobilenet_v1_75,
                     'mobilenet_v1_075': mobilenet.mobilenet_v1_075,
                     'mobilenet_v1_050': mobilenet.mobilenet_v1_050,
                     'mobilenet_v1_025': mobilenet.mobilenet_v1_025,

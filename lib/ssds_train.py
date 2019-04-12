@@ -38,8 +38,8 @@ class Solver(object):
         print('===> Loading data')
         self.train_loader = load_data(cfg.DATASET, 'train') if 'train' in cfg.PHASE else None
         self.eval_loader = load_data(cfg.DATASET, 'eval') if 'eval' in cfg.PHASE else None
-        # self.test_loader = load_data(cfg.DATASET, 'test') if 'test' in cfg.PHASE else None
-        self.test_loader = load_data(cfg.DATASET, 'test') if 'custom_visualize' in cfg.PHASE else None
+        self.test_loader = load_data(cfg.DATASET, 'test') if 'test' in cfg.PHASE else None
+        # self.test_loader = load_data(cfg.DATASET, 'test') if 'custom_visualize' in cfg.PHASE else None
         self.visualize_loader = load_data(cfg.DATASET, 'visualize') if 'visualize' in cfg.PHASE else None
 
         # Build model
@@ -311,6 +311,8 @@ class Solver(object):
             time = _t.toc()
             loc_loss += loss_l.data[0]
             conf_loss += loss_c.data[0]
+
+            del images, loss, out
 
             # log per iter
             log = '\r==>Train: || {iters:d}/{epoch_size:d} in {time:.3f}s [{prograss}] || loc_loss: {loc_loss:.4f} cls_loss: {cls_loss:.4f}\r'.format(
