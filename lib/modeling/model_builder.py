@@ -33,6 +33,7 @@ networks_map = {
                     'mobilenet_v1': mobilenet.mobilenet_v1,
                     'mobilenet_v1_38':mobilenet.mobilenet_v1_38,
                     'mobilenet_v1_75':mobilenet.mobilenet_v1_75,
+                    'mobilenet_v1_38_2': mobilenet.mobilenet_v1_38_2,
                     'mobilenet_v1_075': mobilenet.mobilenet_v1_075,
                     'mobilenet_v1_050': mobilenet.mobilenet_v1_050,
                     'mobilenet_v1_025': mobilenet.mobilenet_v1_025,

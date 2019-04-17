@@ -59,6 +59,23 @@ V1_CONV_DEFS_75 = [
     DepthSepConv(stride=1, depth=1024)
 ]
 
+V1_CONV_DEFS_38_2 = [
+    Conv(stride=2, depth=32),
+    DepthSepConv(stride=1, depth=64),
+    DepthSepConv(stride=2, depth=128),
+    DepthSepConv(stride=1, depth=128),
+    DepthSepConv(stride=1, depth=256),
+    DepthSepConv(stride=1, depth=256),
+    DepthSepConv(stride=2, depth=512),
+    DepthSepConv(stride=1, depth=512),
+    DepthSepConv(stride=1, depth=512),
+    DepthSepConv(stride=1, depth=512),
+    DepthSepConv(stride=1, depth=512),
+    DepthSepConv(stride=1, depth=512),
+    DepthSepConv(stride=2, depth=1024),
+    DepthSepConv(stride=1, depth=1024)
+]
+
 V2_CONV_DEFS = [
     Conv(stride=2, depth=32),
     InvertedResidual(stride=1, depth=16, num=1, t=1),
@@ -165,3 +182,4 @@ mobilenet_v2_025 = wrapped_partial(mobilenet, conv_defs=V2_CONV_DEFS, depth_mult
 ### Added definitions for expanded mobilenet
 mobilenet_v1_38 = wrapped_partial(mobilenet, conv_defs=V1_CONV_DEFS_38, depth_multiplier=1.0)
 mobilenet_v1_75 = wrapped_partial(mobilenet, conv_defs=V1_CONV_DEFS_75, depth_multiplier=1.0)
+mobilenet_v1_38_2 = wrapped_partial(mobilenet, conv_defs=V1_CONV_DEFS_38_2, depth_multiplier=1.0)
