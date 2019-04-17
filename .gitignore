@@ -11,3 +11,4 @@ log*
 *.o
 .idea/*
 *.result
+venv/
