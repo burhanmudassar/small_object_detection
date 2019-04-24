@@ -31,7 +31,7 @@ class Solver(object):
     """
     A wrapper class for the training process
     """
-    def __init__(self):
+    def __init__(self, args):
         self.cfg = cfg
 
         # Load data
@@ -50,14 +50,19 @@ class Solver(object):
 
         # Utilize GPUs for computation
         self.use_gpu = torch.cuda.is_available()
+        self.multi_gpu = args.multi_gpu
+
+
         if self.use_gpu:
             print('Utilize GPUs for computation')
             print('Number of GPU available', torch.cuda.device_count())
+            device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
             self.model.cuda()
             self.priors.cuda()
             cudnn.benchmark = True
-            # if torch.cuda.device_count() > 1:
-                # self.model = torch.nn.DataParallel(self.model).module
+            if torch.cuda.device_count() > 1 and args.multi_gpu:
+                self.model = torch.nn.DataParallel(self.model)
+                self.model.to(device)
 
         # Print the model architecture and parameters
         print('Model architectures:\n{}\n'.format(self.model))
@@ -166,7 +171,11 @@ class Solver(object):
             print(("=> no checkpoint found at '{}'".format(resume_checkpoint)))
             return False
         print(("=> loading checkpoint '{:s}'".format(resume_checkpoint)))
-        return self.model.load_state_dict(torch.load(resume_checkpoint))
+        if torch.cuda.device_count() > 1 and self.multi_gpu:
+            torch_model = self.model.module
+        else:
+            torch_model = self.model
+        return torch_model.load_state_dict(torch.load(resume_checkpoint))
 
 
     def find_previous(self):
@@ -211,12 +220,21 @@ class Solver(object):
             param.requires_grad = False
 
         trainable_param = []
+
         for module in trainable_scope.split(','):
-            if hasattr(self.model, module):
+            if torch.cuda.device_count() > 1 and self.multi_gpu:
+                dec = hasattr(self.model.module, module)
+                torch_model = self.model.module
+            else:
+                dec = hasattr(self.model, module)
+                torch_model = self.model
+
+            if dec:
                 # print(getattr(self.model, module))
-                for param in getattr(self.model, module).parameters():
+
+                for param in getattr(torch_model, module).parameters():
                     param.requires_grad = True
-                trainable_param.extend(getattr(self.model, module).parameters())
+                trainable_param.extend(getattr(torch_model, module).parameters())
 
         return trainable_param
 
@@ -358,11 +376,16 @@ class Solver(object):
         conf_loss = 0
         _t = Timer()
 
-        label = [list() for _ in range(model.num_classes)]
-        gt_label = [list() for _ in range(model.num_classes)]
-        score = [list() for _ in range(model.num_classes)]
-        size = [list() for _ in range(model.num_classes)]
-        npos = [0] * model.num_classes
+        if torch.cuda.device_count() > 1 and self.multi_gpu:
+            torch_model = model.module
+        else:
+            torch_model = model
+
+        label = [list() for _ in range(torch_model.num_classes)]
+        gt_label = [list() for _ in range(torch_model.num_classes)]
+        score = [list() for _ in range(torch_model.num_classes)]
+        size = [list() for _ in range(torch_model.num_classes)]
+        npos = [0] * torch_model.num_classes
 
         for iteration in iter(range((epoch_size))):
         # for iteration in iter(range((10))):
@@ -381,7 +404,7 @@ class Solver(object):
             # loss
             loss_l, loss_c = criterion(out, targets)
 
-            out = (out[0], model.softmax(out[1].view(-1, model.num_classes)))
+            out = (out[0], torch_model.softmax(out[1].view(-1, torch_model.num_classes)))
 
             # detect
             detections = detector.forward(out)
@@ -757,9 +780,9 @@ class Solver(object):
         # self.writer.add_graph(self.model, (dummy_input, ))
 
 
-def train_model():
+def train_model(args):
     # try:
-    s = Solver()
+    s = Solver(args)
     s.train_model()
     # except RuntimeError:
     #     pass

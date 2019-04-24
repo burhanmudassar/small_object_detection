@@ -19,7 +19,11 @@ This repo is depended on the work of [ssd.pytorch](https://github.com/amdegroot/
 
 ## Installation
 1. install [pytorch](http://pytorch.org/)
-2. install requirements by `pip install -r ./requirements.txt`
+2. mkdir data
+3. mkdir data/COCO
+4. cd lib.utils
+5. make
+2. install requirements by `pip3 install -r ./requirements.txt`
 
 ## Usage
 To train, test and demo some specific model. Please run the relative file in folder with the model configure file, like:
