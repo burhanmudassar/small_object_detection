@@ -111,4 +111,7 @@ class MultiBoxLoss(nn.Module):
         loss_c = loss_c.double()
         loss_l/=N
         loss_c/=N
+
+        del loc_t, conf_t
+
         return loss_l,loss_c

@@ -758,8 +758,11 @@ class Solver(object):
 
 
 def train_model():
+    # try:
     s = Solver()
     s.train_model()
+    # except RuntimeError:
+    #     pass
     return True
 
 def test_model():
