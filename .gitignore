@@ -12,3 +12,4 @@ log*
 .idea/*
 *.result
 venv/
+env*

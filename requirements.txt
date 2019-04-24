@@ -1,4 +1,9 @@
+pip>=19
+torch>=1.0
+numpy
 opencv-python
 matplotlib
 tensorboardX
 torchvision
+matplotlib
+pyyaml
