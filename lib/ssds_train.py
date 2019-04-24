@@ -113,7 +113,7 @@ class Solver(object):
         # print("=> Weigths in the checkpoints:")
         # print([k for k, v in list(checkpoint.items())])
 
-        # remove the module in the parrallel model
+        # remove the module in the parallel model
         if 'module.' in list(checkpoint.items())[0][0]:
             pretrained_dict = {'.'.join(k.split('.')[1:]): v for k, v in list(checkpoint.items())}
             checkpoint = pretrained_dict
@@ -151,11 +151,16 @@ class Solver(object):
                         break
             checkpoint = pretrained_dict
 
-        pretrained_dict = {k: v for k, v in checkpoint.items() if k in self.model.state_dict()}
+        if torch.cuda.device_count() > 1 and self.multi_gpu:
+            torch_model = self.model.module
+        else:
+            torch_model = self.model
+
+        pretrained_dict = {k: v for k, v in checkpoint.items() if k in torch_model.state_dict()}
         # print("=> Resume weigths:")
         # print([k for k, v in list(pretrained_dict.items())])
 
-        checkpoint = self.model.state_dict()
+        checkpoint = torch_model.state_dict()
 
         unresume_dict = set(checkpoint)-set(pretrained_dict)
         if len(unresume_dict) != 0:
@@ -164,7 +169,7 @@ class Solver(object):
 
         checkpoint.update(pretrained_dict)
 
-        return self.model.load_state_dict(checkpoint)
+        return torch_model.load_state_dict(checkpoint)
 
     def resume_checkpoint(self, resume_checkpoint):
         if resume_checkpoint == '' or not os.path.isfile(resume_checkpoint):
