@@ -96,7 +96,10 @@ class Solver(object):
         else:
             filename = self.checkpoint_prefix + '_epoch_{:d}'.format(epochs) + '.pth'
         filename = os.path.join(self.output_dir, filename)
-        torch.save(self.model.state_dict(), filename)
+        if torch.cuda.device_count() > 1 and self.multi_gpu:
+            torch.save(self.model.module.state_dict(), filename)
+        else:
+            torch.save(self.model.state_dict(), filename)
         with open(os.path.join(self.output_dir, 'checkpoint_list.txt'), 'a') as f:
             f.write('epoch {epoch:d}: {filename}\n'.format(epoch=epochs, filename=filename))
         print('Wrote snapshot to: {:s}'.format(filename))
@@ -566,7 +569,6 @@ class Solver(object):
             # boxes = boxes.detach().cpu().numpy()
             # scores = scores.detach().cpu().numpy()
 
-
             time = _t.toc()
 
             # TODO: make it smart:
@@ -622,6 +624,9 @@ class Solver(object):
                     time=time)
             sys.stdout.write(log)
             sys.stdout.flush()
+
+            del images, out, detections
+
 
         # write result to pkl
 #        with open(os.path.join(output_dir, 'detections.pkl'), 'wb') as f:
@@ -793,7 +798,7 @@ def train_model(args):
     #     pass
     return True
 
-def test_model():
-    s = Solver()
+def test_model(args):
+    s = Solver(args)
     s.test_model()
     return True
