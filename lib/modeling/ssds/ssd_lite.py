@@ -109,6 +109,9 @@ def add_extras(base, feature_layer, mbox, num_classes):
         if layer == 'S':
             extra_layers += [ _conv_dw(in_channels, depth, stride=2, padding=1, expand_ratio=1) ]
             in_channels = depth
+        if layer == 'P':
+            extra_layers += [ _conv_dw(in_channels, depth, stride=2, padding=0, expand_ratio=1) ]
+            in_channels = depth
         elif layer == '':
             extra_layers += [ _conv_dw(in_channels, depth, stride=1, expand_ratio=1) ]
             in_channels = depth
