@@ -26,6 +26,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Train a ssds.pytorch network')
     parser.add_argument('--cfg', dest='config_file',
             help='optional config file', default=None, type=str)
+    parser.add_argument('--multi_gpu', dest='multi_gpu', help='Use multi-gpu training or testing', action='store_true')
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -38,7 +39,7 @@ def test():
     args = parse_args()
     if args.config_file is not None:
         cfg_from_file(args.config_file)
-    test_model()
+    test_model(args)
 
 if __name__ == '__main__':
     test()

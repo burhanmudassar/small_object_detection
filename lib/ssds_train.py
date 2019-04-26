@@ -103,7 +103,7 @@ class Solver(object):
 
         # TODO: write relative cfg under the same page
 
-    def resume_checkpoint_initial(self, resume_checkpoint):
+    def resume_checkpoint(self, resume_checkpoint):
         if resume_checkpoint == '' or not os.path.isfile(resume_checkpoint):
             print(("=> no checkpoint found at '{}'".format(resume_checkpoint)))
             return False
@@ -171,16 +171,16 @@ class Solver(object):
 
         return torch_model.load_state_dict(checkpoint)
 
-    def resume_checkpoint(self, resume_checkpoint):
-        if resume_checkpoint == '' or not os.path.isfile(resume_checkpoint):
-            print(("=> no checkpoint found at '{}'".format(resume_checkpoint)))
-            return False
-        print(("=> loading checkpoint '{:s}'".format(resume_checkpoint)))
-        if torch.cuda.device_count() > 1 and self.multi_gpu:
-            torch_model = self.model.module
-        else:
-            torch_model = self.model
-        return torch_model.load_state_dict(torch.load(resume_checkpoint))
+    # def resume_checkpoint(self, resume_checkpoint):
+    #     if resume_checkpoint == '' or not os.path.isfile(resume_checkpoint):
+    #         print(("=> no checkpoint found at '{}'".format(resume_checkpoint)))
+    #         return False
+    #     print(("=> loading checkpoint '{:s}'".format(resume_checkpoint)))
+    #     if torch.cuda.device_count() > 1 and self.multi_gpu:
+    #         torch_model = self.model.module
+    #     else:
+    #         torch_model = self.model
+    #     return torch_model.load_state_dict(torch.load(resume_checkpoint))
 
 
     def find_previous(self):
@@ -215,7 +215,7 @@ class Solver(object):
         #         getattr(self.model, module).apply(self.weights_init)
         if self.checkpoint:
             print('Loading initial model weights from {:s}'.format(self.checkpoint))
-            self.resume_checkpoint_initial(self.checkpoint)
+            self.resume_checkpoint(self.checkpoint)
 
         start_epoch = 0
         return start_epoch
@@ -793,7 +793,7 @@ def train_model(args):
     #     pass
     return True
 
-def test_model():
-    s = Solver()
+def test_model(args):
+    s = Solver(args)
     s.test_model()
     return True

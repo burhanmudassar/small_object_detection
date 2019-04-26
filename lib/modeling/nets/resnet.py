@@ -28,6 +28,13 @@ V50_CONV_DEFS = [
     # Bottleneck(stride=2, depth=512, num=3, t=4),
 ]
 
+V50_CONV_DEFS_v2 = [
+    Bottleneck(stride=1, depth=64, num=3, t=4),
+    Bottleneck(stride=1, depth=128, num=4, t=4),
+    Bottleneck(stride=2, depth=256, num=6, t=4),
+    # Bottleneck(stride=2, depth=512, num=3, t=4),
+]
+
 V101_CONV_DEFS = [
     Bottleneck(stride=1, depth=64, num=3, t=4),
     Bottleneck(stride=2, depth=128, num=4, t=4),
@@ -141,4 +148,5 @@ resnet_18 = wrapped_partial(resnet, conv_defs=V18_CONV_DEFS, depth_multiplier=1.
 resnet_34 = wrapped_partial(resnet, conv_defs=V34_CONV_DEFS, depth_multiplier=1.0)
 
 resnet_50 = wrapped_partial(resnet, conv_defs=V50_CONV_DEFS, depth_multiplier=1.0)
+resnet_50_v2 = wrapped_partial(resnet, conv_defs=V50_CONV_DEFS_v2, depth_multiplier=1.0)
 resnet_101 = wrapped_partial(resnet, conv_defs=V101_CONV_DEFS, depth_multiplier=1.0)
