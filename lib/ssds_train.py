@@ -406,6 +406,8 @@ class Solver(object):
             # forward
             out = model(images, phase='train')
 
+
+
             # loss
             loss_l, loss_c = criterion(out, targets)
 
@@ -557,6 +559,9 @@ class Solver(object):
 #            # forward
             out = model(images, phase='eval')
 
+            time_out = _t.toc()
+
+            _t.tic()
 #            # detect
             detections = detector.forward(out)
             detections = detections.detach().cpu().numpy()
@@ -567,16 +572,19 @@ class Solver(object):
             # scores = scores.detach().cpu().numpy()
 
 
-            time = _t.toc()
+            time_detect = _t.toc()
 
+            _t.tic()
             # TODO: make it smart:
+            scale = np.expand_dims(np.expand_dims(np.array(scale), 1), 1)
+            detections[:, :, :, 1:] *= scale
             for i, img_id in enumerate(idxs):
                 for j in range(1, num_classes):
                     cls_dets = list()
                     cls_mask = np.where(detections[i,j,:,0] > 0)[0]
                     if len(cls_mask) > 0:
                         box = detections[i, j, cls_mask, 1:]
-                        box *= np.array(scale[i])
+                        # box *= np.array(scale[i])
                         score = detections[i, j, cls_mask, 0:1]
                         #
                         # for ik in range(box.shape[0]):
@@ -599,6 +607,7 @@ class Solver(object):
                         cls_dets = empty_array
                     all_boxes[j][img_id] = np.array(cls_dets)
 
+            time_store = _t.toc()
             # im_to_plot = dataset.pull_image(0)
             # font = cv2.FONT_HERSHEY_SIMPLEX
             # for label_ind, label in enumerate(dataset._classes[1:]):
@@ -617,9 +626,9 @@ class Solver(object):
             # plt.show()
 
             # log per iter
-            log = '\r==>Test: || {iters:d}/{epoch_size:d} in {time:.3f}s [{prograss}]\r'.format(
+            log = '\r==>Test: || {iters:d}/{epoch_size:d} in {time_out:.3f}s {time_detect:.3f}s {time_store:.3f}s [{prograss}]\r'.format(
                     prograss='#'*int(round(10*iteration/epoch_size)) + '-'*int(round(10*(1-iteration/epoch_size))), iters=iteration, epoch_size=epoch_size,
-                    time=time)
+                    time_out=time_out, time_detect=time_detect, time_store=time_store)
             sys.stdout.write(log)
             sys.stdout.flush()
 

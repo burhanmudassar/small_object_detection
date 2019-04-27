@@ -6,6 +6,10 @@ from torch.autograd import Variable
 from lib.utils.box_utils import decode,nms
 # from lib.utils.nms.nms_wrapper import nms
 from lib.utils.timer import Timer
+from lib.nms.gpu_nms import gpu_nms
+from lib.nms.cpu_nms import cpu_nms
+from lib.nms.py_cpu_nms import py_cpu_nms
+import numpy as np
 
 class Detect(Function):
     """At test time, Detect is the final layer of SSD.  Decode location preds,
@@ -149,7 +153,16 @@ class Detect(Function):
                 # keep = nms(cls_dets, self.nms_thresh)
                 # cls_dets = cls_dets[keep.view(-1).long()]
                 try:
-                    ids, count = nms(boxes, scores, self.nms_thresh, self.top_k)
+                    new_boxes = boxes * 300
+                # ids, count = nms(boxes, scores, self.nms_thresh, self.top_k)
+                    ids = gpu_nms(torch.cat((new_boxes, scores.unsqueeze(1)), 1).cpu().numpy(), self.nms_thresh)
+                # new_ids_cpu = cpu_nms(torch.cat((boxes, scores.unsqueeze(1)), 1).cpu().numpy(), self.nms_thresh)
+
+                    if len(ids) > self.top_k:
+                        count = self.top_k
+                    else:
+                        count = len(ids)
+
                 except:
                     print(c_mask.size())
                     print(boxes.size())
@@ -160,7 +173,7 @@ class Detect(Function):
                     torch.cat((scores[ids[:count]].unsqueeze(1),
                                boxes[ids[:count]]), 1)
         nms_time= _t['misc'].toc()
-        # print(nms_time, cpu_tims, scores_time,box_time,gpunms_time)
+        print(nms_time, cpu_tims, scores_time,box_time,gpunms_time)
         # flt = self.output.view(-1, 5)
         # _, idx = flt[:, 0].sort(0)
         # _, rank = idx.sort(0)
