@@ -4,7 +4,15 @@ import torch.nn as nn
 base = {
     'vgg16': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'C', 512, 512, 512, 'M',
             512, 512, 512],
+    'vgg16_1': [64, 64, 'E', 128, 128, 'M', 256, 256, 256, 'C', 512, 512, 512, 'M',
+              512, 512, 512],
+    # 'vgg16_2': [64, 64, 'E', 128, 128, 'E', 256, 256, 256, 'C', 512, 512, 512, 'M',
+    #           512,'M', 512, 512, 'M'],
+    'vgg16_2': [64, 64, 'E', 128, 128, 'E', 256, 256, 256, 'C', 512, 512, 512, 'M',
+                512, 512, 512],
+
 }
+
 
 # CONV_DEFS_16 = [
 #     Conv(stride=1, depth=64),
@@ -48,6 +56,8 @@ def vgg(cfg, i, batch_norm=False):
     for v in cfg:
         if v == 'M':
             layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
+        elif v == 'E':
+            layers += [nn.MaxPool2d(kernel_size=1, stride=1)]
         elif v == 'C':
             layers += [nn.MaxPool2d(kernel_size=2, stride=2, ceil_mode=True)]
         else:
@@ -65,6 +75,65 @@ def vgg(cfg, i, batch_norm=False):
         nn.ReLU(inplace=True)]
     return layers
 
+
+def vgg1(cfg, i, batch_norm=False):
+    layers = []
+    in_channels = i
+    for v in cfg:
+        if v == 'M':
+            layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
+        elif v == 'E':
+            layers += [nn.MaxPool2d(kernel_size=1, stride=1)]
+        elif v == 'C':
+            layers += [nn.MaxPool2d(kernel_size=2, stride=2, ceil_mode=True)]
+        else:
+            conv2d = nn.Conv2d(in_channels, v, kernel_size=3, padding=1)
+            if batch_norm:
+                layers += [conv2d, nn.BatchNorm2d(v), nn.ReLU(inplace=True)]
+            else:
+                layers += [conv2d, nn.ReLU(inplace=True)]
+            in_channels = v
+    layers += [
+        nn.MaxPool2d(kernel_size=3, stride=2, padding=0),
+        nn.Conv2d(512, 1024, kernel_size=3, padding=6, dilation=6),
+        nn.ReLU(inplace=True),
+        nn.Conv2d(1024, 1024, kernel_size=1),
+        nn.ReLU(inplace=True)]
+    return layers
+
+def vgg2(cfg, i, batch_norm=False):
+    layers = []
+    in_channels = i
+    for v in cfg:
+        if v == 'M':
+            layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
+        elif v == 'E':
+            layers += [nn.MaxPool2d(kernel_size=1, stride=1)]
+        elif v == 'C':
+            layers += [nn.MaxPool2d(kernel_size=2, stride=2, ceil_mode=True)]
+        else:
+            conv2d = nn.Conv2d(in_channels, v, kernel_size=3, padding=1)
+            if batch_norm:
+                layers += [conv2d, nn.BatchNorm2d(v), nn.ReLU(inplace=True)]
+            else:
+                layers += [conv2d, nn.ReLU(inplace=True)]
+            in_channels = v
+    layers += [
+        nn.MaxPool2d(kernel_size=3, stride=3, padding=0),
+        nn.Conv2d(512, 1024, kernel_size=3, padding=6, dilation=6),
+        nn.ReLU(inplace=True),
+        nn.Conv2d(1024, 1024, kernel_size=1),
+        nn.ReLU(inplace=True)]
+    return layers
+
 def vgg16():
     return vgg(base['vgg16'], 3)
+
+def vgg16_1():
+    return vgg1(base['vgg16_1'], 3)
+
+def vgg16_2():
+    return vgg2(base['vgg16_2'], 3)
+
+
 vgg16.name='vgg16'
