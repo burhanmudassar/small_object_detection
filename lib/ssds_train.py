@@ -26,6 +26,19 @@ from lib.utils.eval_utils import *
 from lib.utils.visualize_utils import *
 import matplotlib.pyplot as plt
 import glob
+import PIL.ImageDraw as ImageDraw
+import PIL.Image as Image
+import PIL.ImageFont as ImageFont
+
+color_dict = {
+    'red': (255, 0, 0),
+    'green': (0, 255, 0),
+    'blue': (0, 0, 255),
+    'yellow': (0, 255, 255),
+    'white': (255, 255, 255),
+    'pink': (255, 153, 255),
+    'orange': (255, 128, 0)
+}
 
 class Solver(object):
     """
@@ -38,9 +51,10 @@ class Solver(object):
         print('===> Loading data')
         self.train_loader = load_data(cfg.DATASET, 'train') if 'train' in cfg.PHASE else None
         self.eval_loader = load_data(cfg.DATASET, 'eval') if 'eval' in cfg.PHASE else None
-        self.test_loader = load_data(cfg.DATASET, 'test') if 'test' in cfg.PHASE else None
+        # self.test_loader = load_data(cfg.DATASET, 'test') if 'test' in cfg.PHASE else None
         # self.test_loader = load_data(cfg.DATASET, 'test') if 'custom_visualize' in cfg.PHASE else None
         self.visualize_loader = load_data(cfg.DATASET, 'visualize') if 'visualize' in cfg.PHASE else None
+        self.test_loader = load_data(cfg.DATASET, 'test') if ('test' in cfg.PHASE or 'visualize_results' in cfg.PHASE) else None
 
         # Build model
         print('===> Building model')
@@ -184,17 +198,6 @@ class Solver(object):
         else:
             torch_model = self.model
 
-        #checkpoint = torch.load(resume_checkpoint)
-
-        # print("=> Weigths in the checkpoints:")
-        # print([k for k, v in list(checkpoint.items())])
-
-        # remove the module in the parallel model
-        #if 'module.' in list(checkpoint.items())[0][0]:
-        #    pretrained_dict = {'.'.join(k.split('.')[1:]): v for k, v in list(checkpoint.items())}
-        #    checkpoint = pretrained_dict
-
-
         return torch_model.load_state_dict(torch.load(resume_checkpoint))
 
 
@@ -291,32 +294,39 @@ class Solver(object):
                 self.save_checkpoints(epoch)
 
     def test_model(self):
-        previous = self.find_previous()
-        if previous:
-            for epoch, resume_checkpoint in zip(previous[0], previous[1]):
-                if self.cfg.TEST.TEST_SCOPE[0] <= epoch <= self.cfg.TEST.TEST_SCOPE[1]:
-                    sys.stdout.write('\rEpoch {epoch:d}/{max_epochs:d}:\n'.format(epoch=epoch, max_epochs=self.cfg.TEST.TEST_SCOPE[1]))
-                    self.resume_checkpoint(resume_checkpoint)
-                    if 'eval' in cfg.PHASE:
-                        self.eval_epoch(self.model, self.eval_loader, self.detector, self.criterion, self.writer, epoch, self.use_gpu)
-                    if 'test' in cfg.PHASE:
-                        self.test_epoch(self.model, self.test_loader, self.detector, self.output_dir , self.use_gpu)
-                    if 'visualize' in cfg.PHASE:
-                        self.visualize_epoch(self.model, self.visualize_loader, self.priorbox, self.writer, epoch,  self.use_gpu)
-                    if 'custom_visualize' in cfg.PHASE:
-                        self.custom_visualize(self.model, self.test_loader, self.detector, self.output_dir,
-                                              self.use_gpu)
-        else:
-            sys.stdout.write('\rCheckpoint {}:\n'.format(self.checkpoint))
-            self.resume_checkpoint(self.checkpoint)
-            if 'eval' in cfg.PHASE:
-                self.eval_epoch(self.model, self.eval_loader, self.detector, self.criterion, self.writer, 0, self.use_gpu)
-            if 'test' in cfg.PHASE:
-                self.test_epoch(self.model, self.test_loader, self.detector, self.output_dir , self.use_gpu)
-            if 'custom_visualize' in cfg.PHASE:
-                self.custom_visualize(self.model, self.test_loader, self.detector, self.output_dir , self.use_gpu)
-            if 'visualize' in cfg.PHASE:
-                self.visualize_epoch(self.model, self.visualize_loader, self.priorbox, self.writer, 0,  self.use_gpu)
+        with torch.no_grad():
+            previous = self.find_previous()
+            if previous:
+                for epoch, resume_checkpoint in zip(previous[0], previous[1]):
+                    if self.cfg.TEST.TEST_SCOPE[0] <= epoch <= self.cfg.TEST.TEST_SCOPE[1]:
+                        sys.stdout.write('\rEpoch {epoch:d}/{max_epochs:d}:\n'.format(epoch=epoch, max_epochs=self.cfg.TEST.TEST_SCOPE[1]))
+                        self.resume_checkpoint(resume_checkpoint)
+                        if 'eval' in cfg.PHASE:
+                            self.eval_epoch(self.model, self.eval_loader, self.detector, self.criterion, self.writer, epoch, self.use_gpu)
+                        if 'test' in cfg.PHASE:
+                            self.test_epoch(self.model, self.test_loader, self.detector, self.output_dir , self.use_gpu)
+                        if 'visualize' in cfg.PHASE:
+                            self.visualize_epoch(self.model, self.visualize_loader, self.priorbox, self.writer, epoch,  self.use_gpu)
+                        if 'custom_visualize' in cfg.PHASE:
+                            self.custom_visualize(self.model, self.test_loader, self.detector, self.output_dir,
+                                                  self.use_gpu)
+                        if 'visualize_results' in cfg.PHASE:
+                            self.visualize_results(self.model, self.test_loader, self.detector, self.output_dir,
+                                                  self.use_gpu)
+            else:
+                sys.stdout.write('\rCheckpoint {}:\n'.format(self.checkpoint))
+                self.resume_checkpoint(self.checkpoint)
+                if 'eval' in cfg.PHASE:
+                    self.eval_epoch(self.model, self.eval_loader, self.detector, self.criterion, self.writer, 0, self.use_gpu)
+                if 'test' in cfg.PHASE:
+                    self.test_epoch(self.model, self.test_loader, self.detector, self.output_dir , self.use_gpu)
+                if 'custom_visualize' in cfg.PHASE:
+                    self.custom_visualize(self.model, self.test_loader, self.detector, self.output_dir , self.use_gpu)
+                if 'visualize' in cfg.PHASE:
+                    self.visualize_epoch(self.model, self.visualize_loader, self.priorbox, self.writer, 0,  self.use_gpu)
+                if 'visualize_results' in cfg.PHASE:
+                    self.visualize_results(self.model, self.test_loader, self.detector, self.output_dir,
+                                           self.use_gpu)
 
 
     def train_epoch(self, model, data_loader, optimizer, criterion, writer, epoch, use_gpu):
@@ -757,7 +767,121 @@ class Solver(object):
         images.volatile=False
         base_out = viz_module_grads(writer, model, model.base, images, images, preproc.means, module_name='base', epoch=epoch)
 
-        # TODO: add more...
+    def visualize_results(self, model, data_loader, detector, output_dir, use_gpu):
+        model.eval()
+
+        epoch_size = len(data_loader)
+        batch_iterator = iter(data_loader)
+
+        dataset = data_loader.dataset
+        num_images = len(dataset)
+        num_classes = detector.num_classes
+        all_boxes = [[[] for _ in range(num_images)] for _ in range(num_classes)]
+        empty_array = np.transpose(np.array([[], [], [], [], []]), (1, 0))
+
+        _t = Timer()
+
+        out_dir = os.path.join(output_dir,'images_det/')
+        os.makedirs(out_dir, exist_ok=True)
+
+        # for i in iter(range((num_images))):
+        for iteration in iter(range((epoch_size))):
+            if batch_iterator is not None:
+                images, targets, idxs, orig_shape = next(batch_iterator)
+            else:
+                continue
+            scale = [[o[1], o[0], o[1], o[0]] for o in orig_shape]
+
+            if use_gpu:
+                images = Variable(images.cuda())
+            else:
+                images = Variable(images)
+
+            _t.tic()
+            #            # forward
+            out = model(images, phase='eval')
+
+            #            # detect
+            detections = detector.forward(out)
+            detections = detections.detach().cpu().numpy()
+
+            time = _t.toc()
+
+            try:
+                font = ImageFont.truetype('/usr/share/fonts/truetype/freefont/FreeMono.ttf', 18)
+            except IOError:
+                font = ImageFont.load_default()
+
+            # TODO: make it smart:
+            for i, img_id in enumerate(idxs):
+                for j in range(1, num_classes):
+                    cls_dets = list()
+                    cls_mask = np.where(detections[i, j, :, 0] > 0)[0]
+                    if len(cls_mask) > 0:
+                        box = detections[i, j, cls_mask, 1:]
+                        box *= np.array(scale[i])
+                        score = detections[i, j, cls_mask, 0:1]
+                        cls_dets = np.concatenate((box, score), axis=1)
+
+                    if len(cls_dets) == 0:
+                        cls_dets = empty_array
+                    all_boxes[j][img_id] = np.array(cls_dets)
+
+                im_to_plot = dataset.pull_image(img_id)
+                im_to_plot = Image.fromarray(np.uint8(im_to_plot[:, :, ::-1]))
+
+                for label_ind, label in enumerate(dataset._classes[1:]):
+                    for detection in all_boxes[label_ind+1][img_id]:
+                        box = detection[:4].astype(np.int32)
+                        score = detection[-1]
+                        if (score < 0.2):
+                            continue
+                        # else:
+                        #     print(label, box, score)
+
+                        # cv2.rectangle(im_to_plot, (box[0], box[1]), (box[2], box[3]), (255, 0, 0), 2)
+                        # txt = '{}: {:.3f}'.format(label, score)
+                        # cv2.putText(im_to_plot, txt, (box[0], box[1]), font, 0.5, (255, 255, 255), 1)
+                        color = random.choice(['green', 'blue', 'yellow', 'pink', 'white', 'red', 'orange'])
+                        draw = ImageDraw.Draw(im_to_plot)
+
+                        draw.line([(box[0], box[1]), (box[0], box[3]),
+                                   (box[2], box[3]),
+                                   (box[2], box[1]), (box[0], box[1])], width=2,
+                                  fill=color_dict[color])
+                        display_str_list = ['{}: {:.3f}'.format(label, score)]
+                        display_str_heights = [font.getsize(ds)[1] for ds in display_str_list]
+                        total_display_str_height = (1 + 2 * 0.05) * sum(display_str_heights)
+                        if box[1] > total_display_str_height:
+                            text_bottom = box[1]
+                        else:
+                            text_bottom = box[3] + total_display_str_height
+
+                        for display_str in display_str_list[::-1]:
+                            text_width, text_height = font.getsize(display_str)
+                            margin = np.ceil(0.05 * text_height)
+                            draw.rectangle(
+                                [(box[0], text_bottom - text_height - 2 * margin), (box[0] + text_width,
+                                                                                  text_bottom)],
+                                fill='blue')
+                            draw.text(
+                                (box[0] + margin, text_bottom - text_height - margin),
+                                display_str,
+                                fill='white',
+                                font=font)
+                            text_bottom -= text_height - 2 * margin
+                im_to_plot = np.array(im_to_plot)[:, :, ::-1]
+                cv2.imwrite(out_dir + str(img_id).zfill(6) + '.jpg', im_to_plot)
+
+            # log per iter
+            log = '\r==>Test: || {iters:d}/{epoch_size:d} in {time:.3f}s [{prograss}]\r'.format(
+                prograss='#' * int(round(10 * iteration / epoch_size)) + '-' * int(
+                    round(10 * (1 - iteration / epoch_size))), iters=iteration, epoch_size=epoch_size,
+                time=time)
+            sys.stdout.write(log)
+            sys.stdout.flush()
+
+            del images, out, detections
 
 
     def configure_optimizer(self, trainable_param, cfg):
