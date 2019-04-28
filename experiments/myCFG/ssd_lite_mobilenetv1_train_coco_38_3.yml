@@ -11,9 +11,9 @@ MODEL:
 TRAIN:
   MAX_EPOCHS: 100
   CHECKPOINTS_EPOCHS: 1
-  BATCH_SIZE: 32
+  BATCH_SIZE: 16
   TRAINABLE_SCOPE: 'base,norm,extras,loc,conf'
-  RESUME_SCOPE: 'base'
+  RESUME_SCOPE: 'base,norm,extras,loc,conf'
   OPTIMIZER:
     OPTIMIZER: sgd
     LEARNING_RATE: 0.001
@@ -25,7 +25,7 @@ TRAIN:
 
 TEST:
   BATCH_SIZE: 32
-  TEST_SCOPE: [22,22]
+  TEST_SCOPE: [21,21]
 
 MATCHER:
   MATCHED_THRESHOLD: 0.5
@@ -47,4 +47,4 @@ DATASET:
 EXP_DIR: './experiments/models/ssd_mobilenet_v1_coco_expansion_38_3'
 LOG_DIR: './experiments/models/ssd_mobilenet_v1_coco_expansion_38_3'
 RESUME_CHECKPOINT: './weights/ssd_lite/mobilenet_v1_ssd_lite_coco_18.8.pth'
-PHASE: ['train', 'eval']
+PHASE: ['test']

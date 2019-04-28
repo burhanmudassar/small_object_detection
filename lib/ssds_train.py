@@ -183,6 +183,18 @@ class Solver(object):
             torch_model = self.model.module
         else:
             torch_model = self.model
+
+        #checkpoint = torch.load(resume_checkpoint)
+
+        # print("=> Weigths in the checkpoints:")
+        # print([k for k, v in list(checkpoint.items())])
+
+        # remove the module in the parallel model
+        #if 'module.' in list(checkpoint.items())[0][0]:
+        #    pretrained_dict = {'.'.join(k.split('.')[1:]): v for k, v in list(checkpoint.items())}
+        #    checkpoint = pretrained_dict
+
+
         return torch_model.load_state_dict(torch.load(resume_checkpoint))
 
 
