@@ -21,7 +21,7 @@ TRAIN:
     WEIGHT_DECAY: 0.0001
   LR_SCHEDULER:
     SCHEDULER: SGDR
-    WARM_UP_EPOCHS: 10
+    WARM_UP_EPOCHS: 0
 
 TEST:
   BATCH_SIZE: 16
@@ -44,7 +44,7 @@ DATASET:
   TEST_SETS:  [['2017', 'val']]
   PROB: 0.6
 
-EXP_DIR: './experiments/models/ssd_resnet50_coco_v2'
-LOG_DIR: './experiments/models/ssd_resnet50_coco_v2'
+EXP_DIR: './experiments/models/ssd_resnet50_coco_v2_new'
+LOG_DIR: './experiments/models/ssd_resnet50_coco_v2_new'
 RESUME_CHECKPOINT: './weights/ssd/resnet50_ssd_coco_25.1.pth'
-PHASE: ['train']
+PHASE: ['train', 'eval']

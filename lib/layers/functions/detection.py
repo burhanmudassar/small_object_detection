@@ -173,7 +173,7 @@ class Detect(Function):
                     torch.cat((scores[ids[:count]].unsqueeze(1),
                                boxes[ids[:count]]), 1)
         nms_time= _t['misc'].toc()
-        print(nms_time, cpu_tims, scores_time,box_time,gpunms_time)
+        # print(nms_time, cpu_tims, scores_time,box_time,gpunms_time)
         # flt = self.output.view(-1, 5)
         # _, idx = flt[:, 0].sort(0)
         # _, rank = idx.sort(0)
