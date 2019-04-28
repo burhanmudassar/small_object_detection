@@ -20,7 +20,7 @@ from lib.utils.config_parse import cfg_from_file
 from lib.ssds_train import Solver
 from flops_counter import add_flops_counting_methods, flops_to_string, get_model_parameters_number
 from lib.utils.timer import Timer
-
+from lib.utils.config_parse import cfg
 
 def parse_args():
     """
@@ -58,19 +58,22 @@ def test():
             model = s.model
             _t = Timer()
 
+            batch_size = 16
+
             timing_array = []
             for i in range(1000):
 
                 _t.tic()
-                batch = torch.FloatTensor(1, 3, 300, 300).cuda(0)
+                batch = torch.FloatTensor(batch_size, 3, cfg.DATASET.IMAGE_SIZE[0], cfg.DATASET.IMAGE_SIZE[1]).cuda(0)
                 model = add_flops_counting_methods(model)
                 model.eval().start_flops_count()
                 out = model(batch)
                 inf_time = _t.toc()
+                timing_array.append(inf_time)
 
-            print("Inference Time Mean: {:0.3f} Std Dev: {:0.3f}".format(np.mean(inf_time), np.std(inf_time)))
+            print("Inference Time Mean: {:0.6f} Std Dev: {:0.6f}".format(np.mean(timing_array)*1000/batch_size, np.std(timing_array)*1000/batch_size))
 
-            print(model)
+            #print(model)
 
 
         #print('Output shape: {}'.format(list(out.shape)))

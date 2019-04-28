@@ -47,4 +47,4 @@ DATASET:
 EXP_DIR: './experiments/models/ssd_mobilenet_v1_coco_expansion_38_3'
 LOG_DIR: './experiments/models/ssd_mobilenet_v1_coco_expansion_38_3'
 RESUME_CHECKPOINT: './weights/ssd_lite/mobilenet_v1_ssd_lite_coco_18.8.pth'
-PHASE: ['test']
+PHASE: ['visualize_results']
