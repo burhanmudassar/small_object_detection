@@ -43,11 +43,11 @@ V1_CONV_DEFS_38 = [
 ]
 
 V1_CONV_DEFS_75 = [
-    Conv(stride=2, depth=32),
+    Conv(stride=1, depth=32),
     DepthSepConv(stride=1, depth=64),
     DepthSepConv(stride=2, depth=128),
     DepthSepConv(stride=1, depth=128),
-    DepthSepConv(stride=1, depth=256),
+    DepthSepConv(stride=2, depth=256),
     DepthSepConv(stride=1, depth=256),
     DepthSepConv(stride=1, depth=512),
     DepthSepConv(stride=1, depth=512),
