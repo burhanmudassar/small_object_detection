@@ -281,6 +281,8 @@ class Solver(object):
                 self.exp_lr_scheduler.step(epoch-warm_up)
             if 'train' in cfg.PHASE:
                 self.train_epoch(self.model, self.train_loader, self.optimizer, self.criterion, self.writer, epoch, self.use_gpu)
+                if epoch % cfg.TRAIN.CHECKPOINTS_EPOCHS == 0:
+                    self.save_checkpoints(epoch)
             if 'eval' in cfg.PHASE:
                 with torch.no_grad():
                     self.eval_epoch(self.model, self.eval_loader, self.detector, self.criterion, self.writer, epoch, self.use_gpu)
@@ -290,8 +292,7 @@ class Solver(object):
             if 'visualize' in cfg.PHASE:
                 self.visualize_epoch(self.model, self.visualize_loader, self.priorbox, self.writer, epoch,  self.use_gpu)
 
-            if epoch % cfg.TRAIN.CHECKPOINTS_EPOCHS == 0:
-                self.save_checkpoints(epoch)
+
 
     def test_model(self):
         with torch.no_grad():
