@@ -273,13 +273,15 @@ class COCODetection(data.Dataset):
         precision = \
             coco_eval.eval['precision'][ind_lo:(ind_hi + 1), :, :, 0, 2]
         ap_default = np.mean(precision[precision > -1])
-        print('~~~~ Mean and per-category AP @ IoU=[{:.2f},{:.2f}] '
+        print('~~~~ Mean and per-category AP and AR @ IoU=[{:.2f},{:.2f}] '
                '~~~~'.format(IoU_lo_thresh, IoU_hi_thresh))
         print('{:.1f}'.format(100 * ap_default))
+        print('{:>4} {:>4} {:>4} {:>4} {:>4} {:>4} {:>4} {:>4}'.format('AP', 'AP_S', 'AP_M', 'AP_L', 'AR', 'AR_S', 'AR_M', 'AR_L'))
         for cls_ind, cls in enumerate(self._classes):
             if cls == '__background__':
                 continue
             # minus 1 because of __background__
+            ## PER CLASS PRECISION
             precision = coco_eval.eval['precision'][ind_lo:(ind_hi + 1), :, cls_ind - 1, 0, 2]
             precision_s = coco_eval.eval['precision'][ind_lo:(ind_hi + 1), :, cls_ind - 1, 1, 2]
             precision_m = coco_eval.eval['precision'][ind_lo:(ind_hi + 1), :, cls_ind - 1, 2, 2]
@@ -288,7 +290,17 @@ class COCODetection(data.Dataset):
             ap_s = np.mean(precision_s[precision_s > -1])
             ap_m = np.mean(precision_m[precision_m > -1])
             ap_l = np.mean(precision_l[precision_l > -1])
-            print('{:.1f} {:.1f} {:.1f} {:.1f}'.format(100 * ap, 100*ap_s, 100*ap_m, 100*ap_l))
+            ## PER CLASS RECALL
+            recall = coco_eval.eval['recall'][ind_lo:(ind_hi + 1), :, cls_ind - 1, 0, 2]
+            recall_s = coco_eval.eval['recall'][ind_lo:(ind_hi + 1), :, cls_ind - 1, 1, 2]
+            recall_m = coco_eval.eval['recall'][ind_lo:(ind_hi + 1), :, cls_ind - 1, 2, 2]
+            recall_l = coco_eval.eval['recall'][ind_lo:(ind_hi + 1), :, cls_ind - 1, 3, 2]
+            ar = np.mean(recall[recall > -1])
+            ar_s = np.mean(recall_s[recall_s > -1])
+            ar_m = np.mean(recall_m[recall_m > -1])
+            ar_l = np.mean(recall_l[recall_l > -1])
+
+            print('{:>4} {:>4} {:>4} {:>4} {:>4} {:>4} {:>4} {:>4}'.format(100 * ap, 100*ap_s, 100*ap_m, 100*ap_l, 100*ar, 100*ar_s, 100*ar_m, 100*ar_l))
 
         print('~~~~ Summary metrics ~~~~')
         coco_eval.summarize()
