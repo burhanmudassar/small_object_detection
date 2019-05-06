@@ -1,17 +1,17 @@
 MODEL:
-  SSDS: ssd_lite
-  NETS: mobilenet_v1_38_2
+  SSDS: ssd_lite_dual
+  NETS: mobilenet_v1_38_3
   IMAGE_SIZE: [300, 300]
   NUM_CLASSES: 81
-  FEATURE_LAYER: [[11, 13, 'S', 'S', 'S', 'P'], [512, 1024, 512, 256, 256, 128]]
-  STEPS: [[8, 8], [16, 16], [32, 32], [64, 64], [100, 100], [300,300]]
-  SIZES: [[10, 10], [45, 45], [90, 90], [135, 135], [180, 180], [225, 225], [315, 315]]
+  FEATURE_LAYER: [[11, 13, 'E', 'S', 'S', 'P'], [512, 1536, 512, 256, 256, 128]]
+  STEPS: [[8, 8], [16, 16], [32, 32], [64, 64], [100, 100], [300, 300]]
+  SIZES: [[10, 10], [45, 45], [90, 90], [135, 135], [180, 180], [225, 225], [270, 270]]
   ASPECT_RATIOS: [[1, 2, 3], [1, 2, 3], [1, 2, 3], [1, 2, 3], [1, 2, 3], [1, 2]]
 
 TRAIN:
   MAX_EPOCHS: 100
   CHECKPOINTS_EPOCHS: 1
-  BATCH_SIZE: 32
+  BATCH_SIZE: 24
   TRAINABLE_SCOPE: 'base,norm,extras,loc,conf'
   RESUME_SCOPE: 'base'
   OPTIMIZER:
@@ -25,7 +25,7 @@ TRAIN:
 
 TEST:
   BATCH_SIZE: 32
-  TEST_SCOPE: [27,27]
+  TEST_SCOPE: [21, 21]
 
 MATCHER:
   MATCHED_THRESHOLD: 0.5
@@ -44,7 +44,7 @@ DATASET:
   TEST_SETS:  [['2017', 'val']]
   PROB: 0.6
 
-EXP_DIR: './experiments/models/ssd_mobilenet_v1_coco_expansion_38_2_fmap1'
-LOG_DIR: './experiments/models/ssd_mobilenet_v1_coco_expansion_38_2_fmap1'
+EXP_DIR: './experiments/models/ssd_mobilenet_v1_coco_dualpath19'
+LOG_DIR: './experiments/models/ssd_mobilenet_v1_coco_dualpath19'
 RESUME_CHECKPOINT: './weights/ssd_lite/mobilenet_v1_ssd_lite_coco_18.8.pth'
 PHASE: ['test']

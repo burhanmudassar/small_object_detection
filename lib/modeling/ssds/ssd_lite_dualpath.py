@@ -75,9 +75,12 @@ class SSDLite_DualPath(nn.Module):
                     sources.append(s)
                     y1 = y
                 else:
-                    x = torch.cat([x, y1], dim=1)
                     sources.append(x)
                     y2 = y
+
+
+        ## For extra layers use large object features
+        x = y2
 
         # apply extra layers and cache source layer outputs
         for k, v in enumerate(self.extras):

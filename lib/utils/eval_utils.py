@@ -150,9 +150,16 @@ def cal_tp_fp(detects, ground_turths, label, score, npos, gt_label, iou_threshol
 
 
 def cal_size(detects, ground_turths, size):
-    for det, gt in zip(detects, ground_turths):
-        for i, det_c in enumerate(det):  
-            gt_c = [_gt[:4].data.resize_(1,4) for _gt in gt if int(_gt[4]) == i] 
+    '''
+
+    :param detects: List of detections [Batch x Class x Max Dets x 5]
+    :param ground_turths: List of Ground Truths [Batch x Num GT x 5]
+    :param size: Sizes of each ground truth [Class x Num GT x 2] (W,H)
+    :return: size
+    '''
+    for det, gt in zip(detects, ground_turths):         ## For each batch
+        for i, det_c in enumerate(det):                 ## For each class
+            gt_c = [_gt[:4].data.resize_(1,4) for _gt in gt if int(_gt[4]) == i]    ## Match with class label
             if len(gt_c) == 0:
                 continue
             gt_size_c = [ [(_gt[0][2] - _gt[0][0]), (_gt[0][3] - _gt[0][1])] for _gt in gt_c ]

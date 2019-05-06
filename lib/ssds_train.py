@@ -418,8 +418,8 @@ class Solver(object):
         size = [list() for _ in range(torch_model.num_classes)]
         npos = [0] * torch_model.num_classes
 
-        for iteration in iter(range((epoch_size))):
-        # for iteration in iter(range((10))):
+        # for iteration in iter(range((epoch_size))):
+        for iteration in iter(range((2))):
             images, targets, idxs, _ = next(batch_iterator)
             if use_gpu:
                 images = Variable(images.cuda())

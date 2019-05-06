@@ -188,12 +188,18 @@ def viz_pr_curve(writer, precision, recall, epoch=0):
 
 
 def viz_archor_strategy(writer, sizes, labels, epoch=0):
-    ''' generate archor strategy for all classes
+    '''
+
+    :param writer:
+    :param sizes: Variable Size Array [Classes x Num_GT x 2]
+    :param labels: Variable Size Array [Classes x Num_GT x 1]
+    :param epoch:
+    :return:
     '''
 
     # merge all data into one 
     height, width, max_size, min_size, aspect_ratio, label = [list() for _ in range(6)]
-    for _size, _label in zip(sizes[1:], labels[1:]):
+    for _size, _label in zip(sizes[1:], labels[1:]): # Enumerate over class_ind >= 1
         _height, _width, _max_size, _min_size, _aspect_ratio = [list() for _ in range(5)]
         for size in _size:
             _height += [size[0]]
@@ -223,7 +229,7 @@ def viz_archor_strategy(writer, sizes, labels, epoch=0):
 
     # height 
     gt_y, _ = np.histogram(height, bins=num_thresholds, range=(0.0, 1.0))
-    gt_y = np.clip( gt_y[::-1]/len(height), 1e-8, 1.0)
+    gt_y = np.clip( gt_y[::-1]/len(height), 1e-8, 1.0) ### Normalize by x-axis???
     add_pr_curve_raw(
         writer=writer, tag='archor_strategy/height_distribute_gt', precision = gt_y, recall = x_axis, epoch = epoch )
     add_pr_curve_raw(

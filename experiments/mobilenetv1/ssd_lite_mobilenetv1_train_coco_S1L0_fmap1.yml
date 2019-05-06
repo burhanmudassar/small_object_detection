@@ -44,7 +44,7 @@ DATASET:
   TEST_SETS:  [['2017', 'val']]
   PROB: 0.6
 
-EXP_DIR: './experiments/models/ssd_mobilenet_v1_coco_expansion_38_3'
-LOG_DIR: './experiments/models/ssd_mobilenet_v1_coco_expansion_38_3'
+EXP_DIR: './experiments/models/ssd_mobilenet_v1_coco_S1L0_fmap1'
+LOG_DIR: './experiments/models/ssd_mobilenet_v1_coco_S1L0_fmap1'
 RESUME_CHECKPOINT: './weights/ssd_lite/mobilenet_v1_ssd_lite_coco_18.8.pth'
 PHASE: ['test']
