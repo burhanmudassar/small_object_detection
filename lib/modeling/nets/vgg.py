@@ -94,7 +94,7 @@ def vgg1(cfg, i, batch_norm=False):
                 layers += [conv2d, nn.ReLU(inplace=True)]
             in_channels = v
     layers += [
-        nn.MaxPool2d(kernel_size=3, stride=2, padding=0),
+        nn.MaxPool2d(kernel_size=3, stride=1, padding=1),
         nn.Conv2d(512, 1024, kernel_size=3, padding=6, dilation=6),
         nn.ReLU(inplace=True),
         nn.Conv2d(1024, 1024, kernel_size=1),

@@ -3,15 +3,15 @@ MODEL:
   NETS: vgg16_1
   IMAGE_SIZE: [300, 300]
   NUM_CLASSES: 81
-  FEATURE_LAYER: [[29, 34, 'S', 'S', '', ''], [512, 1024, 512, 256, 256, 256]]
-  STEPS: [[8, 8], [16, 16], [32, 32], [64, 64], [100, 100], [300, 300]]
-  SIZES: [[30, 30], [60, 60], [111, 111], [162, 162], [213, 213], [264, 264], [315, 315]]
+  FEATURE_LAYER: [[22, 34, 'S', 'S', 'S', 'S'], [512, 1024, 512, 256, 256, 256]]
+  STEPS: [[4,4], [8, 8], [16, 16], [32, 32], [64, 64], [100, 100]]
+  SIZES: [[15, 15], [30, 30], [60, 60], [111, 111], [162, 162], [213, 213], [264, 264]]
   ASPECT_RATIOS: [[1, 2, 3], [1, 2, 3], [1, 2, 3], [1, 2, 3], [1, 2], [1, 2]]
 
 TRAIN:
   MAX_EPOCHS: 60
   CHECKPOINTS_EPOCHS: 1
-  BATCH_SIZE: 32
+  BATCH_SIZE: 16
   TRAINABLE_SCOPE: 'base,norm,extras,loc,conf'
   RESUME_SCOPE: 'base'
   OPTIMIZER:
@@ -24,8 +24,8 @@ TRAIN:
     WARM_UP_EPOCHS: 5
 
 TEST:
-  BATCH_SIZE: 64
-  TEST_SCOPE: [55, 60]
+  BATCH_SIZE: 32
+  TEST_SCOPE: [26, 26]
 
 MATCHER:
   MATCHED_THRESHOLD: 0.5
@@ -44,7 +44,7 @@ DATASET:
   TEST_SETS:  [['2017', 'val']]
   PROB: 0.6
 
-EXP_DIR: './experiments/models/ssd_vgg16_coco_1'
-LOG_DIR: './experiments/models/ssd_vgg16_coco_1'
+EXP_DIR: './experiments/models/ssd_vgg16_coco_1_allSses'
+LOG_DIR: './experiments/models/ssd_vgg16_coco_1_allSses'
 RESUME_CHECKPOINT: './weights/ssd/vgg16_ssd_coco_24.4.pth'
-PHASE: ['train', 'eval']
+PHASE: ['test']
