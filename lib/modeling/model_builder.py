@@ -7,6 +7,7 @@ from lib.modeling.ssds import rfb_lite
 from lib.modeling.ssds import fssd
 from lib.modeling.ssds import fssd_lite
 from lib.modeling.ssds import yolo
+from lib.modeling.ssds import ssd_dual
 
 ssds_map = {
                 'ssd': ssd.build_ssd,
@@ -17,6 +18,7 @@ ssds_map = {
                 'fssd_lite': fssd_lite.build_fssd_lite,
                 'yolo_v2': yolo.build_yolo_v2,
                 'yolo_v3': yolo.build_yolo_v3,
+                'ssd_dual': ssd_dual.build_ssd_dual
             }
 
 # nets part
