@@ -7,7 +7,6 @@ This repo builds on the excellent SSD repository [ssds.pytorch](https://github.c
 - <a href='#installation'>Installation</a>
 - <a href='#usage'>Usage</a>
 - <a href='#performance'>Performance and Model Zoo</a>
-- <a href='#visualization'>Visualization</a>
 - <a href='#todo'>Future Work</a>
 - <a href='#reference'>Reference</a>
 
