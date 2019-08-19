@@ -7,7 +7,7 @@ import os
 
 from lib.layers import *
 
-class SSD(nn.Module):
+class SSD_Dual(nn.Module):
     """Single Shot Multibox Architecture
     See: https://arxiv.org/pdf/1512.02325.pdf for more details.
 
@@ -21,7 +21,7 @@ class SSD(nn.Module):
     """
 
     def __init__(self, base, extras, head, feature_layer, num_classes):
-        super(SSD, self).__init__()
+        super(SSD_Dual, self).__init__()
         self.num_classes = num_classes
         # SSD network
         self.base = nn.ModuleList(base)
@@ -167,7 +167,7 @@ def build_ssd_dual(base, feature_layer, mbox, num_classes):
     See: https://arxiv.org/pdf/1512.02325.pdf for more details.
     """
     base_, extras_, head_ = add_extras(base(), feature_layer, mbox, num_classes, version='ssd')
-    return SSD(base_, extras_, head_, feature_layer, num_classes)
+    return SSD_Dual(base_, extras_, head_, feature_layer, num_classes)
 
 def build_ssd_lite(base, feature_layer, mbox, num_classes):
     """Single Shot Multibox Architecture for embeded system
@@ -175,4 +175,4 @@ def build_ssd_lite(base, feature_layer, mbox, num_classes):
     https://arxiv.org/pdf/1801.04381.pdf for more details.
     """
     base_, extras_, head_ = add_extras(base(), feature_layer, mbox, num_classes, version='ssd_lite')
-    return SSD(base_, extras_, head_, feature_layer, num_classes)
+    return SSD_Dual(base_, extras_, head_, feature_layer, num_classes)

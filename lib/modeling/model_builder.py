@@ -8,6 +8,7 @@ from lib.modeling.ssds import fssd
 from lib.modeling.ssds import fssd_lite
 from lib.modeling.ssds import yolo
 from lib.modeling.ssds import ssd_dual
+from lib.modeling.ssds import ssd_lite_dualpath
 
 ssds_map = {
                 'ssd': ssd.build_ssd,
@@ -18,7 +19,8 @@ ssds_map = {
                 'fssd_lite': fssd_lite.build_fssd_lite,
                 'yolo_v2': yolo.build_yolo_v2,
                 'yolo_v3': yolo.build_yolo_v3,
-                'ssd_dual': ssd_dual.build_ssd_dual
+                'ssd_dual': ssd_dual.build_ssd_dual,
+                'ssd_lite_dual': ssd_lite_dualpath.build_ssd_lite_dual
             }
 
 # nets part
@@ -28,18 +30,17 @@ from lib.modeling.nets import mobilenet
 from lib.modeling.nets import darknet
 networks_map = {
                     'vgg16': vgg.vgg16,
-                    'vgg16_1': vgg.vgg16_1,
-                    'vgg16_2': vgg.vgg16_2,
+                    'vgg16_S1L2': vgg.vgg16_S1L2,
+                    'vgg16_S2L2_5': vgg.vgg16_S2L2_5,
                     'resnet_18': resnet.resnet_18,
                     'resnet_34': resnet.resnet_34,
                     'resnet_50': resnet.resnet_50,
-                    'resnet_50_v2': resnet.resnet_50_v2,
                     'resnet_101': resnet.resnet_101,
                     'mobilenet_v1': mobilenet.mobilenet_v1,
-                    'mobilenet_v1_38':mobilenet.mobilenet_v1_38,
-                    'mobilenet_v1_75':mobilenet.mobilenet_v1_75,
-                    'mobilenet_v1_38_2': mobilenet.mobilenet_v1_38_2,
-                    'mobilenet_v1_38_3': mobilenet.mobilenet_v1_38_3,
+                    'mobilenet_v1_S1L6':mobilenet.mobilenet_v1_S1L6,
+                    'mobilenet_v1_S2L0_6':mobilenet.mobilenet_v1_S2L0_6,
+                    'mobilenet_v1_S1L4': mobilenet.mobilenet_v1_S1L4,
+                    'mobilenet_v1_S1L0': mobilenet.mobilenet_v1_S1L0,
                     'mobilenet_v1_075': mobilenet.mobilenet_v1_075,
                     'mobilenet_v1_050': mobilenet.mobilenet_v1_050,
                     'mobilenet_v1_025': mobilenet.mobilenet_v1_025,
@@ -75,8 +76,7 @@ def create_model(cfg):
     [print(str(k)+str(f)) for k,f in enumerate(model.base)]
     print('==>Feature map size:')
     print(feature_maps)
-    # exit()
-    #
+    # 
     priorbox = PriorBox(image_size=cfg.IMAGE_SIZE, feature_maps=feature_maps, aspect_ratios=cfg.ASPECT_RATIOS, 
                     scale=cfg.SIZES, archor_stride=cfg.STEPS, clip=cfg.CLIP)
     # priors = Variable(priorbox.forward(), volatile=True)

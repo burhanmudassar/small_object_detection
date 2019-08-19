@@ -4,11 +4,11 @@ import torch.nn as nn
 base = {
     'vgg16': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'C', 512, 512, 512, 'M',
             512, 512, 512],
-    'vgg16_1': [64, 64, 'E', 128, 128, 'M', 256, 256, 256, 'C', 512, 512, 512, 'M',
+    'vgg16_S1L2': [64, 64, 'E', 128, 128, 'M', 256, 256, 256, 'C', 512, 512, 512, 'M',
               512, 512, 512],
     # 'vgg16_2': [64, 64, 'E', 128, 128, 'E', 256, 256, 256, 'C', 512, 512, 512, 'M',
     #           512,'M', 512, 512, 'M'],
-    'vgg16_2': [64, 64, 'E', 128, 128, 'E', 256, 256, 256, 'C', 512, 512, 512, 'M',
+    'vgg16_S2L2_5': [64, 64, 'E', 128, 128, 'E', 256, 256, 256, 'C', 512, 512, 512, 'M',
                 512, 512, 512],
 
 }
@@ -76,7 +76,7 @@ def vgg(cfg, i, batch_norm=False):
     return layers
 
 
-def vgg1(cfg, i, batch_norm=False):
+def vggS1(cfg, i, batch_norm=False):
     layers = []
     in_channels = i
     for v in cfg:
@@ -101,7 +101,7 @@ def vgg1(cfg, i, batch_norm=False):
         nn.ReLU(inplace=True)]
     return layers
 
-def vgg2(cfg, i, batch_norm=False):
+def vggS2(cfg, i, batch_norm=False):
     layers = []
     in_channels = i
     for v in cfg:
@@ -129,11 +129,11 @@ def vgg2(cfg, i, batch_norm=False):
 def vgg16():
     return vgg(base['vgg16'], 3)
 
-def vgg16_1():
-    return vgg1(base['vgg16_1'], 3)
+def vgg16_S1L2():
+    return vggS1(base['vgg16_S1L2'], 3)
 
-def vgg16_2():
-    return vgg2(base['vgg16_2'], 3)
+def vgg16_S2L2_5():
+    return vggS2(base['vgg16_S2L2_5'], 3)
 
 
 vgg16.name='vgg16'

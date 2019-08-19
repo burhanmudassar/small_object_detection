@@ -1,6 +1,6 @@
 MODEL:
   SSDS: ssd
-  NETS: vgg16_1
+  NETS: vgg16_S1L2
   IMAGE_SIZE: [300, 300]
   NUM_CLASSES: 81
   FEATURE_LAYER: [[22, 34, 'S', 'S', 'S', 'S'], [512, 1024, 512, 256, 256, 256]]
@@ -24,7 +24,7 @@ TRAIN:
     WARM_UP_EPOCHS: 5
 
 TEST:
-  BATCH_SIZE: 32
+  BATCH_SIZE: 8
   TEST_SCOPE: [26, 26]
 
 MATCHER:
@@ -44,7 +44,7 @@ DATASET:
   TEST_SETS:  [['2017', 'val']]
   PROB: 0.6
 
-EXP_DIR: './experiments/models/ssd_vgg16_coco_1_allSses'
-LOG_DIR: './experiments/models/ssd_vgg16_coco_1_allSses'
+EXP_DIR: './experiments/models/ssd_vgg16_S1L2_coco'
+LOG_DIR: './experiments/models/ssd_vgg16_S1L2_coco'
 RESUME_CHECKPOINT: './weights/ssd/vgg16_ssd_coco_24.4.pth'
 PHASE: ['test']

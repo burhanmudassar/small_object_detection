@@ -7,7 +7,7 @@ import os
 
 from lib.layers import *
 
-class SSDLite(nn.Module):
+class SSDLite_DualPath(nn.Module):
     """Single Shot Multibox Architecture for embeded system
     See: https://arxiv.org/pdf/1512.02325.pdf & 
     https://arxiv.org/pdf/1801.04381.pdf for more details.
@@ -22,7 +22,7 @@ class SSDLite(nn.Module):
     """
 
     def __init__(self, base, extras, head, feature_layer, num_classes):
-        super(SSDLite, self).__init__()
+        super(SSDLite_DualPath, self).__init__()
         self.num_classes = num_classes
         # SSD network
         self.base = nn.ModuleList(base)
@@ -64,19 +64,34 @@ class SSDLite(nn.Module):
         # apply bases layers and cache source layer outputs
         for k in range(len(self.base)):
             x = self.base[k](x)
+            if k == 0:
+                y = x ## For S1L0 store the output of Conv2D
+                y = y[..., ::2, ::2]
+            else:
+                y = self.base[k](y)
             if k in self.feature_layer:
                 if len(sources) == 0:
                     s = self.norm(x)
                     sources.append(s)
+                    y1 = y
                 else:
                     sources.append(x)
+                    y2 = y
+
+
+        ## For extra layers use large object features
+        x = y2
 
         # apply extra layers and cache source layer outputs
         for k, v in enumerate(self.extras):
+            # if k == 1:
+            #     x = torch.cat([x, y2], dim=1)
             x = F.relu(v(x), inplace=True)
             sources.append(x)
             # if k % 2 == 1:
             #     sources.append(x)
+
+        # sources[2] = torch.cat((sources[2], y2), dim=1)
 
         if phase == 'feature':
             return sources
@@ -109,16 +124,24 @@ def add_extras(base, feature_layer, mbox, num_classes):
         if layer == 'S':
             extra_layers += [ _conv_dw(in_channels, depth, stride=2, padding=1, expand_ratio=1) ]
             in_channels = depth
-        if layer == 'P':
+        elif layer == 'P':
             extra_layers += [ _conv_dw(in_channels, depth, stride=2, padding=0, expand_ratio=1) ]
+            in_channels = depth
+        elif layer == 'E':
+            extra_layers += [_conv_dw(in_channels, depth, stride=2, padding=1, expand_ratio=1)]
             in_channels = depth
         elif layer == '':
             extra_layers += [ _conv_dw(in_channels, depth, stride=1, expand_ratio=1) ]
             in_channels = depth
         else:
             in_channels = depth
-        loc_layers += [nn.Conv2d(in_channels, box * 4, kernel_size=3, padding=1)]
-        conf_layers += [nn.Conv2d(in_channels, box * num_classes, kernel_size=3, padding=1)]
+
+        if layer == 'E':
+            loc_layers += [nn.Conv2d(in_channels, box * 4, kernel_size=3, padding=1)]
+            conf_layers += [nn.Conv2d(in_channels, box * num_classes, kernel_size=3, padding=1)]
+        else:
+            loc_layers += [nn.Conv2d(in_channels, box * 4, kernel_size=3, padding=1)]
+            conf_layers += [nn.Conv2d(in_channels, box * num_classes, kernel_size=3, padding=1)]
     return base, extra_layers, (loc_layers, conf_layers)
 
 # based on the implementation in https://github.com/tensorflow/models/blob/master/research/object_detection/models/feature_map_generators.py#L213
@@ -138,6 +161,6 @@ def _conv_dw(inp, oup, stride=1, padding=0, expand_ratio=1):
         nn.BatchNorm2d(oup),
     )
 
-def build_ssd_lite(base, feature_layer, mbox, num_classes):
+def build_ssd_lite_dual(base, feature_layer, mbox, num_classes):
     base_, extras_, head_ = add_extras(base(), feature_layer, mbox, num_classes)
-    return SSDLite(base_, extras_, head_, feature_layer, num_classes)
+    return SSDLite_DualPath(base_, extras_, head_, feature_layer, num_classes)

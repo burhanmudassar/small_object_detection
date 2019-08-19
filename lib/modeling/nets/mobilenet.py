@@ -25,7 +25,7 @@ V1_CONV_DEFS = [
     DepthSepConv(stride=1, depth=1024)
 ]
 
-V1_CONV_DEFS_38 = [
+V1_CONV_DEFS_S1L6 = [
     Conv(stride=2, depth=32),
     DepthSepConv(stride=1, depth=64),
     DepthSepConv(stride=2, depth=128),
@@ -42,12 +42,12 @@ V1_CONV_DEFS_38 = [
     DepthSepConv(stride=1, depth=1024)
 ]
 
-V1_CONV_DEFS_75 = [
-    Conv(stride=2, depth=32),
+V1_CONV_DEFS_S2L0_6 = [
+    Conv(stride=1, depth=32),
     DepthSepConv(stride=1, depth=64),
     DepthSepConv(stride=2, depth=128),
     DepthSepConv(stride=1, depth=128),
-    DepthSepConv(stride=1, depth=256),
+    DepthSepConv(stride=2, depth=256),
     DepthSepConv(stride=1, depth=256),
     DepthSepConv(stride=1, depth=512),
     DepthSepConv(stride=1, depth=512),
@@ -59,7 +59,7 @@ V1_CONV_DEFS_75 = [
     DepthSepConv(stride=1, depth=1024)
 ]
 
-V1_CONV_DEFS_38_2 = [
+V1_CONV_DEFS_S1L4 = [
     Conv(stride=2, depth=32),
     DepthSepConv(stride=1, depth=64),
     DepthSepConv(stride=2, depth=128),
@@ -76,7 +76,7 @@ V1_CONV_DEFS_38_2 = [
     DepthSepConv(stride=1, depth=1024)
 ]
 
-V1_CONV_DEFS_38_3 = [
+V1_CONV_DEFS_S1L0 = [
     Conv(stride=1, depth=32),
     DepthSepConv(stride=1, depth=64),
     DepthSepConv(stride=2, depth=128),
@@ -197,7 +197,7 @@ mobilenet_v2_050 = wrapped_partial(mobilenet, conv_defs=V2_CONV_DEFS, depth_mult
 mobilenet_v2_025 = wrapped_partial(mobilenet, conv_defs=V2_CONV_DEFS, depth_multiplier=0.25)
 
 ### Added definitions for expanded mobilenet
-mobilenet_v1_38 = wrapped_partial(mobilenet, conv_defs=V1_CONV_DEFS_38, depth_multiplier=1.0)
-mobilenet_v1_75 = wrapped_partial(mobilenet, conv_defs=V1_CONV_DEFS_75, depth_multiplier=1.0)
-mobilenet_v1_38_2 = wrapped_partial(mobilenet, conv_defs=V1_CONV_DEFS_38_2, depth_multiplier=1.0)
-mobilenet_v1_38_3 = wrapped_partial(mobilenet, conv_defs=V1_CONV_DEFS_38_3, depth_multiplier=1.0)
+mobilenet_v1_S1L6 = wrapped_partial(mobilenet, conv_defs=V1_CONV_DEFS_S1L6, depth_multiplier=1.0)
+mobilenet_v1_S1L4 = wrapped_partial(mobilenet, conv_defs=V1_CONV_DEFS_S1L4, depth_multiplier=1.0)
+mobilenet_v1_S1L0 = wrapped_partial(mobilenet, conv_defs=V1_CONV_DEFS_S1L0, depth_multiplier=1.0)
+mobilenet_v1_S2L0_6 = wrapped_partial(mobilenet, conv_defs=V1_CONV_DEFS_S2L0_6, depth_multiplier=1.0)
