@@ -11,18 +11,21 @@ This repo builds on the excellent SSD repository [ssds.pytorch](https://github.c
 - <a href='#reference'>Reference</a>
 
 ## Installation
-Compatible with Pytorch 1.0
+Compatible with Pytorch 1.0.0 and Python 3.5
 
-1. mkdir data
-2. mkdir data/COCO
-3. cd lib.utils
-4. make
-5. install requirements by `pip3 install -r ./requirements.txt`
+1. Create a virtual environment by `python3 -m venv venv1`
+2. Source the virtual environment by `source venv1/bin/activate`
+3. Install requirements by `pip3 install -r ./requirements.txt`
+4. mkdir data
+5. mkdir data/COCO
+6. Add a shortcut to the COCO images and annotations folder in the local COCO folder e.g. `ln -s <coco_source>/images data/COCO/images`
+7. Compile pyococotools by `cd lib/utils; make`
+8. Compile gpu NMS by `cd lib; make`
 
 ## Usage
 To train, test and demo some specific model. Please run the relative file in folder with the model configure file, like:
 
-`python train.py --cfg=./experiments/mobilenetv1/rfb_lite_mobilenetv2_train_voc.yml`
+`python3 train.py --cfg=./experiments/mobilenetv1/ssd_lite_dual_mobilenetv1_train_coco_S1L0_Split.yml`
 
 Change the configure file based on the note in [config_parse.py](./lib/utils/config_parse.py)
 
