@@ -1,5 +1,5 @@
 pip>=19
-torch>=1.0
+torch==1.0.0
 numpy
 opencv-python
 matplotlib
@@ -7,3 +7,4 @@ tensorboardX
 torchvision
 matplotlib
 pyyaml
+Cython==0.29.7
