@@ -33,8 +33,8 @@ Change the configure file based on the note in [config_parse.py](./lib/utils/con
 
 | COCO2017                                                                          | mAP(small)| mAP(medium)| mAP(large)| mAP(overall)|
 |-----------------------------------------------------------------------------------|-----------|------------|-----------|-------------|
-| [VGG16](https://drive.google.com/open?id=1j7Co11dfT_OJIwAqNpTgjIA-I-btlOXc)       |6.9        |27.9        |40.3       |24.6         |
-| [MobilenetV1](https://drive.google.com/open?id=1ZdiWfBvqBI8ICPP9p4UsQCgY5pSBJxTa) |1.8        |19.1        |36.3       |18.8         |
+| [VGG16](https://drive.google.com/open?id=1Bkt_nZW4fe_UrLyPOVltq0C7cTpABlQI)       |6.9        |27.9        |40.3       |24.6         |
+| [MobilenetV1](https://drive.google.com/file/d/1yBpd3aIDvlK2j7HxsNj8kJuASTCaN5Bo) |1.8        |19.1        |36.3       |18.8         |
 | [MobilenetV1-S1L0](https://gtvault-my.sharepoint.com/:u:/g/personal/bmudassar3_gatech_edu/EWFdH4ivbg1ItcNMU4BeoasBigQk_PvzzRoc4QxCHpooWQ?e=r6GYx0) |7.9        |25.2        |28.6       |19.6         |
 | [MobilenetV1-S1L0 Dualpath-Split](https://gtvault-my.sharepoint.com/:u:/g/personal/bmudassar3_gatech_edu/ETnwvzTw0UxAjfVCKy27GWcBVqta38WORkDnGDpAgouFcQ?e=9WLtA5) |8.2        |25.0        |30.8       |20.7         |
 | [VGG16-S1L2](https://gtvault-my.sharepoint.com/:u:/g/personal/bmudassar3_gatech_edu/EbAtKQCFUuNNoK7Q6c6wEvwB0k1yNXZuyQiRqYuSpc9RAg?e=kp7qwv)       |11.2        |27.3        |33.4       |23.7         |
