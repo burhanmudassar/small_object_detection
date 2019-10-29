@@ -1,4 +1,4 @@
-# ssds.pytorch
+# Small Object Detection - BMVC 2019
 Repository for our work on small object detection to be presented at BMVC 2019.
 
 This repo builds on the excellent SSD repository [ssds.pytorch](https://github.com/ShuangXieIrene/ssds.pytorch). Huge shoutout.
