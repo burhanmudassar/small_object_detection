@@ -3,6 +3,8 @@ Repository for our work on small object detection to be presented at BMVC 2019.
 
 This repo builds on the excellent SSD repository [ssds.pytorch](https://github.com/ShuangXieIrene/ssds.pytorch). Huge shoutout.
 
+![Top: SSD Mobilenet V1, Bottom: SSD Mobilenet V1 S1L0](./doc/imgs/overall-result-visual.png)
+
 ### Table of Contents
 - <a href='#installation'>Installation</a>
 - <a href='#usage'>Usage</a>
